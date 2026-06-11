@@ -34,7 +34,7 @@ const containerVariants = {
 
 const cardVariants = {
   hidden: { opacity: 0, y: 24, scale: 0.96 },
-  show: { opacity: 1, y: 0, scale: 1, transition: { duration: 0.35, ease: 'easeOut' } },
+  show: { opacity: 1, y: 0, scale: 1, transition: { duration: 0.35, ease: 'easeOut' as const } },
 };
 
 // De-duplicate teams by countryCode (some appear in multiple groups in data)

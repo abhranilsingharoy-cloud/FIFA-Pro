@@ -70,7 +70,7 @@ function StatBar({
 function KpiCard({
   icon: Icon, label, value, sub, color, delay
 }: {
-  icon: React.ElementType; label: string; value: string; sub?: string; color: string; delay: number;
+  icon: any; label: string; value: string; sub?: string; color: string; delay: number;
 }) {
   return (
     <motion.div
@@ -92,7 +92,7 @@ function KpiCard({
           background: `${color}1A`, border: `1px solid ${color}33`,
           display: 'flex', alignItems: 'center', justifyContent: 'center'
         }}>
-          <Icon size={18} style={{ color }} />
+          <Icon size={18} color={color} />
         </div>
       </div>
       <div style={{ fontFamily: 'JetBrains Mono, monospace', fontSize: 30, fontWeight: 700, lineHeight: 1, color: 'var(--text-primary)', marginBottom: 4 }}>

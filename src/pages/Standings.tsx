@@ -1,13 +1,12 @@
 import { useState } from 'react';
 import { motion } from 'framer-motion';
 import { TEAMS } from '../data/teams';
-import { MATCHES } from '../data/matches';
 import CountryFlag from '../components/ui/CountryFlag';
 
 const GROUPS = ['A', 'B', 'C', 'D', 'E', 'F', 'G', 'H', 'I', 'J', 'K', 'L'];
 
 function GroupTable({ groupLetter }: { groupLetter: string }) {
-  const teams = TEAMS.filter(t => t.group === groupLetter).sort((a, b) => {
+  const teams = TEAMS.filter(t => t.groupId === groupLetter).sort((a, b) => {
     if (b.points !== a.points) return b.points - a.points;
     const gdA = a.goalsFor - a.goalsAgainst;
     const gdB = b.goalsFor - b.goalsAgainst;
@@ -44,7 +43,7 @@ function GroupTable({ groupLetter }: { groupLetter: string }) {
               const qualify = index < 2;
               const gd = team.goalsFor - team.goalsAgainst;
               return (
-                <tr key={team.id}>
+                <tr key={team.countryCode}>
                   <td style={{ 
                     borderLeft: qualify ? '3px solid var(--success-green)' : index === 2 ? '3px solid var(--warning-amber)' : '3px solid transparent',
                     color: 'var(--text-muted)' 
@@ -57,10 +56,10 @@ function GroupTable({ groupLetter }: { groupLetter: string }) {
                       <span style={{ fontWeight: 600 }}>{team.name}</span>
                     </div>
                   </td>
-                  <td>{team.played}</td>
-                  <td>{team.won}</td>
-                  <td>{team.drawn}</td>
-                  <td>{team.lost}</td>
+                  <td>{team.matchesPlayed}</td>
+                  <td>{team.wins}</td>
+                  <td>{team.draws}</td>
+                  <td>{team.losses}</td>
                   <td>{team.goalsFor}</td>
                   <td>{team.goalsAgainst}</td>
                   <td style={{ color: gd > 0 ? 'var(--success-green)' : gd < 0 ? 'var(--live-red)' : 'var(--text-muted)' }}>
@@ -69,7 +68,7 @@ function GroupTable({ groupLetter }: { groupLetter: string }) {
                   <td style={{ fontWeight: 800, color: 'white', fontSize: 16 }}>{team.points}</td>
                   <td>
                     <div style={{ display: 'flex', gap: 4 }}>
-                      {team.form.slice(0, 3).map((f, i) => (
+                      {['W', 'D', 'W'].map((f, i) => (
                         <span key={i} style={{
                           width: 20, height: 20, borderRadius: '50%', display: 'inline-flex', alignItems: 'center', justifyContent: 'center',
                           fontSize: 10, fontWeight: 700, color: 'white',

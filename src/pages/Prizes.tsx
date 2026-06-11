@@ -6,7 +6,7 @@ import { BarChart, Bar, XAxis, YAxis, CartesianGrid, Tooltip, ResponsiveContaine
 import { PRIZE_POOL_TOTAL, PRIZE_BREAKDOWN, HISTORICAL_PRIZE_POOLS } from '../data/prizes';
 import { TEAMS } from '../data/teams';
 import CountryFlag from '../components/ui/CountryFlag';
-import { Trophy, Info, Target, Calendar } from 'lucide-react';
+import { Trophy, Target, Calendar } from 'lucide-react';
 
 export default function Prizes() {
   useEffect(() => {
@@ -71,7 +71,7 @@ export default function Prizes() {
                 <CartesianGrid strokeDasharray="3 3" stroke="rgba(255,255,255,0.05)" horizontal={true} vertical={false} />
                 <XAxis type="number" stroke="var(--text-muted)" tickFormatter={formatMoney} />
                 <YAxis dataKey="stage" type="category" stroke="var(--text-muted)" />
-                <Tooltip cursor={{ fill: 'rgba(255,255,255,0.05)' }} contentStyle={{ background: 'var(--surface-elevated)', border: 'none', borderRadius: 8 }} formatter={(v: number) => `$${(v/1000000).toFixed(1)}M`} />
+                <Tooltip cursor={{ fill: 'rgba(255,255,255,0.05)' }} contentStyle={{ background: 'var(--surface-elevated)', border: 'none', borderRadius: 8 }} formatter={(v: any) => `$${(Number(v)/1000000).toFixed(1)}M`} />
                 <Bar dataKey="perTeam" fill="var(--brand-gold)" radius={[0, 4, 4, 0]} />
               </BarChart>
             </ResponsiveContainer>
@@ -90,7 +90,7 @@ export default function Prizes() {
                 <CartesianGrid strokeDasharray="3 3" stroke="rgba(255,255,255,0.05)" />
                 <XAxis dataKey="year" stroke="var(--text-muted)" />
                 <YAxis stroke="var(--text-muted)" tickFormatter={formatMoney} />
-                <Tooltip contentStyle={{ background: 'var(--surface-elevated)', border: 'none', borderRadius: 8 }} formatter={(v: number) => `$${(v/1000000).toFixed(0)}M`} />
+                <Tooltip contentStyle={{ background: 'var(--surface-elevated)', border: 'none', borderRadius: 8 }} formatter={(v: any) => `$${(Number(v)/1000000).toFixed(0)}M`} />
                 <Line type="monotone" dataKey="pool" stroke="#3B82F6" strokeWidth={3} dot={{ r: 6, fill: '#3B82F6', strokeWidth: 2, stroke: 'var(--surface-card)' }} />
               </LineChart>
             </ResponsiveContainer>
@@ -118,12 +118,12 @@ export default function Prizes() {
               {PRIZE_BREAKDOWN.map((row, i) => (
                 <tr key={i}>
                   <td style={{ fontWeight: 600 }}>{row.stage}</td>
-                  <td>{row.teams}</td>
+                  <td>{row.teamsEliminated.length}</td>
                   <td style={{ color: 'var(--success-green)', fontFamily: 'JetBrains Mono, monospace', fontWeight: 700 }}>
-                    ${(row.perTeam / 1000000).toFixed(1)}M
+                    ${(row.prizeUSD / 1000000).toFixed(1)}M
                   </td>
                   <td style={{ color: 'var(--brand-gold)', fontFamily: 'JetBrains Mono, monospace', fontWeight: 700 }}>
-                    ${(row.total / 1000000).toFixed(1)}M
+                    ${((row.prizeUSD * row.teamsEliminated.length) / 1000000).toFixed(1)}M
                   </td>
                 </tr>
               ))}
@@ -139,7 +139,7 @@ export default function Prizes() {
         <p style={{ color: 'var(--text-muted)' }}>All 48 teams are guaranteed a minimum of $37M for participating in the group stage.</p>
         <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fill, minmax(200px, 1fr))', gap: 16, marginTop: 24 }}>
           {TEAMS.slice(0, 12).map(team => (
-            <div key={team.id} style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', padding: '12px 16px', background: 'var(--surface-elevated)', borderRadius: 8 }}>
+            <div key={team.countryCode} style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', padding: '12px 16px', background: 'var(--surface-elevated)', borderRadius: 8 }}>
               <div style={{ display: 'flex', alignItems: 'center', gap: 10 }}>
                 <CountryFlag countryCode={team.countryCode} size="sm" />
                 <span style={{ fontWeight: 600 }}>{team.name}</span>

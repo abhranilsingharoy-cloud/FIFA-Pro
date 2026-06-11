@@ -3,11 +3,10 @@ import { motion } from 'framer-motion';
 import { PLAYERS } from '../data/players';
 import { LEGENDS } from '../data/legends';
 import { MATCHES } from '../data/matches';
+import { LineChart, Line, XAxis, YAxis, CartesianGrid, Tooltip, ResponsiveContainer } from 'recharts';
 import CountryFlag from '../components/ui/CountryFlag';
-import RatingBadge from '../components/ui/RatingBadge';
 import StatBar from '../components/ui/StatBar';
-import { Crown, Activity, Target, Shield, Zap, Info } from 'lucide-react';
-import { LineChart, Line, XAxis, YAxis, CartesianGrid, Tooltip, ResponsiveContainer, BarChart, Bar, Cell } from 'recharts';
+import { Crown, Activity, Target } from 'lucide-react';
 
 export default function PlayerDetail() {
   const { playerId } = useParams();
@@ -21,7 +20,7 @@ export default function PlayerDetail() {
     m.status === 'completed'
   );
 
-  const ratingHistory = playerMatches.map((m, i) => ({
+  const ratingHistory = playerMatches.map((_m, i) => ({
     match: `Match ${i + 1}`,
     rating: player.tournamentStats.avgRating + (Math.random() * 2 - 1), // mock rating variance
   }));
@@ -85,7 +84,7 @@ export default function PlayerDetail() {
               <span style={{ width: 4, height: 4, borderRadius: '50%', background: 'var(--text-muted)' }} />
               <span style={{ fontSize: 13, fontWeight: 700, padding: '2px 8px', borderRadius: 4, background: 'rgba(255,255,255,0.1)' }}>{player.position}</span>
               <span style={{ width: 4, height: 4, borderRadius: '50%', background: 'var(--text-muted)' }} />
-              <span style={{ fontSize: 14, color: 'var(--text-muted)' }}>Age: {player.age}</span>
+              <span style={{ fontSize: 14, color: 'var(--text-muted)' }}>Born: {player.dateOfBirth}</span>
             </div>
             {legend && (
               <div style={{ marginTop: 16, fontSize: 15, color: '#FFD700', fontFamily: 'JetBrains Mono, monospace', fontWeight: 600 }}>

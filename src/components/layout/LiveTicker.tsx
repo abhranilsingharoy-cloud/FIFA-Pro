@@ -1,4 +1,4 @@
-import { Match } from '../../types';
+import type { Match } from '../../types';
 import { useNavigate } from 'react-router-dom';
 
 function getCountryFlag(code: string) {

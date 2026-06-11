@@ -16,6 +16,7 @@ import {
   Trophy,
   ChevronRight,
   Navigation,
+  Building2,
 } from 'lucide-react';
 import { STADIUMS } from '../data/stadiums';
 import { MATCHES } from '../data/matches';
