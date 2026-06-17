@@ -19,8 +19,8 @@ interface TournamentState {
   setTimezone: (tz: string) => void;
   togglePerformanceMode: () => void;
   toggleSidebar: () => void;
-  simulateLiveUpdate: () => void;
-  fetchData: () => Promise<void>;
+  fetchData: (backgroundRefresh?: boolean) => Promise<void>;
+  startAutoRefresh: () => void;
 }
 
 export const useTournamentStore = create<TournamentState>((set, get) => ({
@@ -54,24 +54,8 @@ export const useTournamentStore = create<TournamentState>((set, get) => ({
   togglePerformanceMode: () => set(state => ({ performanceMode: !state.performanceMode })),
   toggleSidebar: () => set(state => ({ sidebarOpen: !state.sidebarOpen })),
 
-  simulateLiveUpdate: () => {
-    const { matches } = get();
-    const liveMatch = matches.find(m => m.status === 'live');
-    if (!liveMatch) return;
-
-    set(state => ({
-      matches: state.matches.map(m => {
-        if (m.status === 'live' && m.liveMinute !== undefined) {
-          const newMinute = Math.min((m.liveMinute || 0) + 1, 90);
-          return { ...m, liveMinute: newMinute };
-        }
-        return m;
-      })
-    }));
-  },
-
-  fetchData: async () => {
-    set({ isLoading: true, error: null });
+  fetchData: async (backgroundRefresh = false) => {
+    if (!backgroundRefresh) set({ isLoading: true, error: null });
     try {
       const [matches, teams, players] = await Promise.all([
         fetchMatches(),
@@ -86,16 +70,14 @@ export const useTournamentStore = create<TournamentState>((set, get) => ({
         isLoading: false
       });
     } catch (err: any) {
-      set({ error: err.message || 'Failed to fetch data', isLoading: false });
+      if (!backgroundRefresh) set({ error: err.message || 'Failed to fetch data', isLoading: false });
     }
+  },
+
+  startAutoRefresh: () => {
+    if ((window as any).refreshInterval) return;
+    (window as any).refreshInterval = setInterval(() => {
+      get().fetchData(true);
+    }, 30000);
   }
 }));
-
-// Auto-simulate live updates every 60 seconds
-let liveInterval: ReturnType<typeof setInterval> | null = null;
-export function startLiveSimulation(store: typeof useTournamentStore) {
-  if (liveInterval) return;
-  liveInterval = setInterval(() => {
-    store.getState().simulateLiveUpdate();
-  }, 60000);
-}

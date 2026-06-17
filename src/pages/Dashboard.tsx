@@ -5,8 +5,8 @@ import {
   CreditCard, Clock, ChevronRight, Award, Zap, Users
 } from 'lucide-react';
 import { useTournamentStore } from '../store/tournamentStore';
-import { MATCHES } from '../data/matches';
-import { PLAYERS } from '../data/players';
+
+
 
 // ─── Helpers ────────────────────────────────────────────────────────────────
 function flagUrl(code: string, size: '32x24' | '48x36' = '32x24') {
@@ -157,15 +157,15 @@ export default function Dashboard() {
   }, []);
 
   // Leaderboard data
-  const sortedByGoals = [...PLAYERS].sort((a, b) => b.tournamentStats.goals - a.tournamentStats.goals).slice(0, 5);
-  const sortedByAssists = [...PLAYERS].sort((a, b) => b.tournamentStats.assists - a.tournamentStats.assists).slice(0, 5);
-  const sortedByRating = [...PLAYERS].sort((a, b) => b.tournamentStats.avgRating - a.tournamentStats.avgRating).slice(0, 5);
+  const sortedByGoals = [...players].sort((a, b) => b.tournamentStats.goals - a.tournamentStats.goals).slice(0, 5);
+  const sortedByAssists = [...players].sort((a, b) => b.tournamentStats.assists - a.tournamentStats.assists).slice(0, 5);
+  const sortedByRating = [...players].sort((a, b) => b.tournamentStats.avgRating - a.tournamentStats.avgRating).slice(0, 5);
 
   const leaderboardData = activeTab === 'goals' ? sortedByGoals
     : activeTab === 'assists' ? sortedByAssists
     : sortedByRating;
 
-  const leaderboardStat = (p: typeof PLAYERS[0]) =>
+  const leaderboardStat = (p: typeof players[0]) =>
     activeTab === 'goals' ? p.tournamentStats.goals
     : activeTab === 'assists' ? p.tournamentStats.assists
     : p.tournamentStats.avgRating;

@@ -1,3 +1,4 @@
+import { useTournamentStore } from '../store/tournamentStore';
 import { useState, useMemo } from 'react';
 import { useParams, useNavigate } from 'react-router-dom';
 import { motion, AnimatePresence } from 'framer-motion';
@@ -5,8 +6,8 @@ import {
   BarChart, Bar, XAxis, YAxis, Tooltip, ResponsiveContainer, Cell,
 } from 'recharts';
 import { ArrowLeft, Trophy, Users, Target, Shield, Shirt, Star, TrendingUp } from 'lucide-react';
-import { TEAMS } from '../data/teams';
-import { MATCHES } from '../data/matches';
+
+
 import type { Position } from '../types';
 
 /* ── MOCK SQUAD DATA GENERATOR ─────────────────────────────────────── */
@@ -102,6 +103,8 @@ function StatBar({ label, value, max, color = 'var(--brand-red)' }: { label: str
 
 /* ── MAIN COMPONENT ─────────────────────────────────────────────────── */
 export default function TeamDetail() {
+  const { matches, players, teams } = useTournamentStore();
+
   const { countryCode } = useParams<{ countryCode: string }>();
   const navigate = useNavigate();
   const [posFilter, setPosFilter] = useState<Position | 'ALL'>('ALL');
@@ -110,14 +113,14 @@ export default function TeamDetail() {
   const [statsTab, setStatsTab] = useState<'attacking' | 'defending' | 'possession' | 'disciplinary'>('attacking');
 
   const team = useMemo(() => {
-    return TEAMS.find(t => t.countryCode.toLowerCase() === (countryCode ?? '').toLowerCase());
+    return teams.find(t => t.countryCode.toLowerCase() === (countryCode ?? '').toLowerCase());
   }, [countryCode]);
 
   const squad = useMemo(() => team ? generateSquad(team) : [], [team]);
 
   const teamMatches = useMemo(() => {
     if (!team) return [];
-    return MATCHES.filter(m =>
+    return matches.filter(m =>
       m.homeTeam.countryCode === team.countryCode || m.awayTeam.countryCode === team.countryCode
     );
   }, [team]);

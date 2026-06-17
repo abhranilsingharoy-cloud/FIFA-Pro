@@ -1,8 +1,9 @@
+import { useTournamentStore } from '../store/tournamentStore';
 import React, { useState, useMemo } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { motion, AnimatePresence } from 'framer-motion';
 import { Search, MapPin, CheckCircle, Radio, Clock, ChevronRight } from 'lucide-react';
-import { MATCHES } from '../data/matches';
+
 import { STADIUMS } from '../data/stadiums';
 import type { Match } from '../types';
 
@@ -176,6 +177,8 @@ function TabSection({ matches, emptyMsg }: { matches: Match[]; emptyMsg: string 
 
 // ─── Main Matches Page ────────────────────────────────────────────────────────
 export default function Matches() {
+  const { matches, players, teams } = useTournamentStore();
+
   const navigate = useNavigate();
   const [activeTab, setActiveTab] = useState<'completed' | 'live' | 'upcoming'>('live');
   const [search, setSearch] = useState('');
@@ -189,26 +192,26 @@ export default function Matches() {
   const currentStatuses = tabs.find(t => t.key === activeTab)?.statuses ?? [];
 
   const filteredMatches = useMemo(() => {
-    let matches = MATCHES.filter(m => currentStatuses.includes(m.status));
+    let filtered = matches.filter(m => currentStatuses.includes(m.status));
     if (search.trim()) {
       const q = search.toLowerCase();
-      matches = matches.filter(m =>
+      filtered = filtered.filter(m =>
         m.homeTeam.name.toLowerCase().includes(q) ||
         m.awayTeam.name.toLowerCase().includes(q)
       );
     }
     // Sort: upcoming by kickoff asc, others by kickoff desc
     if (activeTab === 'upcoming') {
-      matches = [...matches].sort((a, b) => new Date(a.kickoffUtc).getTime() - new Date(b.kickoffUtc).getTime());
+      filtered = [...filtered].sort((a, b) => new Date(a.kickoffUtc).getTime() - new Date(b.kickoffUtc).getTime());
     } else {
-      matches = [...matches].sort((a, b) => new Date(b.kickoffUtc).getTime() - new Date(a.kickoffUtc).getTime());
+      filtered = [...filtered].sort((a, b) => new Date(b.kickoffUtc).getTime() - new Date(a.kickoffUtc).getTime());
     }
-    return matches;
-  }, [activeTab, search, currentStatuses]);
+    return filtered;
+  }, [matches, activeTab, search, currentStatuses]);
 
-  const liveCount = MATCHES.filter(m => m.status === 'live' || m.status === 'ht').length;
-  const completedCount = MATCHES.filter(m => m.status === 'completed').length;
-  const upcomingCount = MATCHES.filter(m => m.status === 'scheduled').length;
+  const liveCount = matches.filter(m => m.status === 'live' || m.status === 'ht').length;
+  const completedCount = matches.filter(m => m.status === 'completed').length;
+  const upcomingCount = matches.filter(m => m.status === 'scheduled').length;
 
   const emptyMessages: Record<string, string> = {
     live: 'No matches are currently live.',
@@ -227,7 +230,7 @@ export default function Matches() {
                 All Matches
               </h1>
               <p style={{ color: 'var(--text-secondary)', fontSize: '14px' }}>
-                FIFA World Cup 2026™ · {MATCHES.length} total matches
+                FIFA World Cup 2026™ · {matches.length} total matches
               </p>
             </div>
 
@@ -251,7 +254,7 @@ export default function Matches() {
           {/* Tabs */}
           <div style={{ display: 'flex', gap: '0', borderBottom: '1px solid var(--border-subtle)' }}>
             {tabs.map(tab => {
-              const count = MATCHES.filter(m => tab.statuses.includes(m.status)).length;
+              const count = matches.filter(m => tab.statuses.includes(m.status)).length;
               const isActive = activeTab === tab.key;
               return (
                 <button

@@ -5,7 +5,7 @@ import {
   Calendar, List, Clock, MapPin, ChevronLeft, ChevronRight,
   Globe, Filter, Zap
 } from 'lucide-react';
-import { MATCHES } from '../data/matches';
+
 import { STADIUMS } from '../data/stadiums';
 import { useTournamentStore } from '../store/tournamentStore';
 import type { Match, MatchStage } from '../types';
@@ -313,6 +313,8 @@ function CalendarGrid({
 
 // ─── Main Schedule Page ───────────────────────────────────────────────────────
 export default function Schedule() {
+  const { matches, players, teams } = useTournamentStore();
+
   const navigate = useNavigate();
   const { selectedTimezone, setTimezone } = useTournamentStore();
   const [viewMode, setViewMode] = useState<ViewMode>('list');
@@ -322,7 +324,7 @@ export default function Schedule() {
 
   // Filter matches
   const filteredMatches = useMemo(() => {
-    return MATCHES.filter(m => {
+    return matches.filter(m => {
       if (stageFilter !== 'all' && m.stage !== stageFilter) return false;
       if (hostFilter !== 'all') {
         const stadium = getStadium(m.stadiumId);
@@ -352,7 +354,7 @@ export default function Schedule() {
     return filteredMatches.filter(m => getDateKey(m.kickoffUtc, selectedTimezone) === selectedDay);
   }, [selectedDay, filteredMatches, selectedTimezone]);
 
-  const liveCount = MATCHES.filter(m => m.status === 'live').length;
+  const liveCount = matches.filter(m => m.status === 'live').length;
 
   return (
     <div style={{ minHeight: '100vh', background: 'var(--brand-navy)', paddingBottom: '48px' }}>

@@ -1,14 +1,17 @@
+import { useTournamentStore } from '../store/tournamentStore';
 import { useEffect } from 'react';
 import { motion } from 'framer-motion';
 import CountUp from 'react-countup';
 import confetti from 'canvas-confetti';
 import { BarChart, Bar, XAxis, YAxis, CartesianGrid, Tooltip, ResponsiveContainer, LineChart, Line } from 'recharts';
 import { PRIZE_POOL_TOTAL, PRIZE_BREAKDOWN, HISTORICAL_PRIZE_POOLS } from '../data/prizes';
-import { TEAMS } from '../data/teams';
+
 import CountryFlag from '../components/ui/CountryFlag';
 import { Trophy, Target, Calendar } from 'lucide-react';
 
 export default function Prizes() {
+  const { matches, players, teams } = useTournamentStore();
+
   useEffect(() => {
     // Fire confetti on mount
     const duration = 3000;
@@ -138,7 +141,7 @@ export default function Prizes() {
         <h3 style={{ marginBottom: 20 }}>Live Team Earnings</h3>
         <p style={{ color: 'var(--text-muted)' }}>All 48 teams are guaranteed a minimum of $37M for participating in the group stage.</p>
         <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fill, minmax(200px, 1fr))', gap: 16, marginTop: 24 }}>
-          {TEAMS.slice(0, 12).map(team => (
+          {teams.slice(0, 12).map(team => (
             <div key={team.countryCode} style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', padding: '12px 16px', background: 'var(--surface-elevated)', borderRadius: 8 }}>
               <div style={{ display: 'flex', alignItems: 'center', gap: 10 }}>
                 <CountryFlag countryCode={team.countryCode} size="sm" />

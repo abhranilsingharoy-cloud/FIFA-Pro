@@ -1,8 +1,9 @@
+import { useTournamentStore } from '../store/tournamentStore';
 import { useState, useMemo } from 'react';
 import { motion } from 'framer-motion';
 import { useNavigate } from 'react-router-dom';
 import { Search, Grid, List, Crown } from 'lucide-react';
-import { PLAYERS } from '../data/players';
+
 import CountryFlag from '../components/ui/CountryFlag';
 import RatingBadge from '../components/ui/RatingBadge';
 
@@ -45,7 +46,9 @@ const posBg: Record<string, string> = {
   GK: 'rgba(255,215,0,0.15)', DEF: 'rgba(96,165,250,0.15)', MID: 'rgba(74,222,128,0.15)', FWD: 'rgba(248,113,113,0.15)',
 };
 
-function PlayerGridCard({ player }: { player: typeof PLAYERS[0] }) {
+import type { Player } from '../types';
+
+function PlayerGridCard({ player }: { player: Player & { isLegend?: boolean } }) {
   const navigate = useNavigate();
   const legendColors: Record<string, string> = {
     ronaldo: '#C8102E', messi: '#74ACDF', neymar: '#009C3B', yamal: '#AA151B',
@@ -101,6 +104,8 @@ function PlayerGridCard({ player }: { player: typeof PLAYERS[0] }) {
 }
 
 export default function Players() {
+  const { matches, players, teams } = useTournamentStore();
+
   const navigate = useNavigate();
   const [search, setSearch] = useState('');
   const [position, setPosition] = useState<string>('ALL');
@@ -110,7 +115,7 @@ export default function Players() {
   const PER_PAGE = 20;
 
   const filtered = useMemo(() => {
-    let list = [...PLAYERS];
+    let list = [...players];
     if (search) list = list.filter(p => p.name.toLowerCase().includes(search.toLowerCase()));
     if (position !== 'ALL') list = list.filter(p => p.position === position);
     list.sort((a, b) => {

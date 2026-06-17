@@ -1,12 +1,12 @@
 import { useState } from 'react';
 import { motion } from 'framer-motion';
-import { TEAMS } from '../data/teams';
+import { useTournamentStore } from '../store/tournamentStore';
 import CountryFlag from '../components/ui/CountryFlag';
 
 const GROUPS = ['A', 'B', 'C', 'D', 'E', 'F', 'G', 'H', 'I', 'J', 'K', 'L'];
 
 function GroupTable({ groupLetter }: { groupLetter: string }) {
-  const teams = TEAMS.filter(t => t.groupId === groupLetter).sort((a, b) => {
+  const teams = useTournamentStore(s => s.teams).filter(t => t.groupId === groupLetter).sort((a, b) => {
     if (b.points !== a.points) return b.points - a.points;
     const gdA = a.goalsFor - a.goalsAgainst;
     const gdB = b.goalsFor - b.goalsAgainst;

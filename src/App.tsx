@@ -45,10 +45,12 @@ function AppContent() {
   const performanceMode = useTournamentStore(s => s.performanceMode);
   const isLoading = useTournamentStore(s => s.isLoading);
   const fetchData = useTournamentStore(s => s.fetchData);
+  const startAutoRefresh = useTournamentStore(s => s.startAutoRefresh);
 
   useEffect(() => {
     fetchData();
-  }, [fetchData]);
+    startAutoRefresh();
+  }, [fetchData, startAutoRefresh]);
 
   if (isLoading) {
     return <GlobalLoader />;

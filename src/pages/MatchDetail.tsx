@@ -1,3 +1,4 @@
+import { useTournamentStore } from '../store/tournamentStore';
 import React, { useMemo } from 'react';
 import { useParams, useNavigate } from 'react-router-dom';
 import { motion } from 'framer-motion';
@@ -5,14 +6,14 @@ import {
   ArrowLeft, MapPin, Users, Star, Calendar,
   User, Award, ChevronRight,
 } from 'lucide-react';
-import { MATCHES } from '../data/matches';
+
 import { STADIUMS } from '../data/stadiums';
-import { PLAYERS } from '../data/players';
+
 import type { MatchEvent } from '../types';
 
 // ─── Helpers ──────────────────────────────────────────────────────────────────
 const getStadium = (id: string) => STADIUMS.find(s => s.id === id);
-const getPlayer = (id: string) => PLAYERS.find(p => p.id === id);
+const getPlayer = (players: any[], id: string) => players.find((p: any) => p.id === id);
 
 function formatDate(utcStr: string): string {
   return new Intl.DateTimeFormat('en-US', {
@@ -174,12 +175,14 @@ const POS_COLORS: Record<string, { bg: string; color: string }> = {
 
 // ─── Main MatchDetail Page ────────────────────────────────────────────────────
 export default function MatchDetail() {
+  const { matches, players, teams } = useTournamentStore();
+
   const { matchId } = useParams<{ matchId: string }>();
   const navigate = useNavigate();
 
-  const match = useMemo(() => MATCHES.find(m => m.id === matchId), [matchId]);
+  const match = useMemo(() => matches.find(m => m.id === matchId), [matchId]);
   const stadium = match ? getStadium(match.stadiumId) : undefined;
-  const motmPlayer = match?.manOfTheMatch ? getPlayer(match.manOfTheMatch) : undefined;
+  const motmPlayer = match?.manOfTheMatch ? getPlayer(players, match.manOfTheMatch) : undefined;
 
   if (!match) {
     return (

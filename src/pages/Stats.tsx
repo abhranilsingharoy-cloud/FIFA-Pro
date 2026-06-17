@@ -1,6 +1,7 @@
+import { useTournamentStore } from '../store/tournamentStore';
 import { motion } from 'framer-motion';
 import { BarChart, Bar, AreaChart, Area, XAxis, YAxis, CartesianGrid, Tooltip, ResponsiveContainer, RadarChart, PolarGrid, PolarAngleAxis, PolarRadiusAxis, Radar, ScatterChart, Scatter, ZAxis } from 'recharts';
-import { PLAYERS } from '../data/players';
+
 
 const goalsByMinute = Array.from({ length: 90 }, (_, i) => ({
   minute: i + 1,
@@ -17,11 +18,13 @@ const confedData = [
 ];
 
 export default function Stats() {
-  const topScorers = [...PLAYERS].sort((a, b) => b.tournamentStats.goals - a.tournamentStats.goals).slice(0, 10).map(p => ({
+  const { matches, players, teams } = useTournamentStore();
+
+  const topScorers = [...players].sort((a, b) => b.tournamentStats.goals - a.tournamentStats.goals).slice(0, 10).map(p => ({
     name: p.name, goals: p.tournamentStats.goals,
   }));
 
-  const topAssisters = [...PLAYERS].sort((a, b) => b.tournamentStats.assists - a.tournamentStats.assists).slice(0, 10).map(p => ({
+  const topAssisters = [...players].sort((a, b) => b.tournamentStats.assists - a.tournamentStats.assists).slice(0, 10).map(p => ({
     name: p.name, assists: p.tournamentStats.assists,
   }));
 

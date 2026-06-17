@@ -4,9 +4,9 @@ export const MATCHES: Match[] = [
   // GROUP A
   {
     id: 'm001', stage: 'group', groupId: 'A', matchNumber: 1,
-    homeTeam: { countryCode: 'US', name: 'United States' },
-    awayTeam: { countryCode: 'MX', name: 'Mexico' },
-    stadiumId: 'sofi', kickoffUtc: '2026-06-11T20:00:00Z',
+    homeTeam: { countryCode: 'PT', name: 'Portugal' },
+    awayTeam: { countryCode: 'CD', name: 'Congo DR' },
+    stadiumId: 'sofi', kickoffUtc: '2026-06-17T15:00:00Z',
     status: 'completed', score: { home: 2, away: 1 }, attendance: 70240, referee: 'Clément Turpin',
     manOfTheMatch: 'pulisic',
     events: [
@@ -19,9 +19,9 @@ export const MATCHES: Match[] = [
   },
   {
     id: 'm002', stage: 'group', groupId: 'A', matchNumber: 2,
-    homeTeam: { countryCode: 'CA', name: 'Canada' },
-    awayTeam: { countryCode: 'NG', name: 'Nigeria' },
-    stadiumId: 'bmo', kickoffUtc: '2026-06-11T23:00:00Z',
+    homeTeam: { countryCode: 'GB', name: 'England' },
+    awayTeam: { countryCode: 'HR', name: 'Croatia' },
+    stadiumId: 'bmo', kickoffUtc: '2026-06-17T18:00:00Z',
     status: 'live', score: { home: 1, away: 2 }, liveMinute: 67, attendance: 45600, referee: 'Slavko Vincic',
     events: [
       { id: 'e005', type: 'goal', minute: 15, team: 'away', playerName: 'Victor Osimhen', assistPlayerName: 'Samuel Chukwueze', description: 'Clinical finish on the break' },
@@ -33,9 +33,9 @@ export const MATCHES: Match[] = [
   // GROUP B
   {
     id: 'm003', stage: 'group', groupId: 'B', matchNumber: 1,
-    homeTeam: { countryCode: 'AR', name: 'Argentina' },
-    awayTeam: { countryCode: 'EC', name: 'Ecuador' },
-    stadiumId: 'metlife', kickoffUtc: '2026-06-12T00:00:00Z',
+    homeTeam: { countryCode: 'GH', name: 'Ghana' },
+    awayTeam: { countryCode: 'PA', name: 'Panama' },
+    stadiumId: 'metlife', kickoffUtc: '2026-06-17T21:00:00Z',
     status: 'completed', score: { home: 3, away: 0 }, attendance: 82500, referee: 'Anthony Taylor',
     manOfTheMatch: 'messi',
     events: [
@@ -47,9 +47,9 @@ export const MATCHES: Match[] = [
   },
   {
     id: 'm004', stage: 'group', groupId: 'B', matchNumber: 2,
-    homeTeam: { countryCode: 'BR', name: 'Brazil' },
-    awayTeam: { countryCode: 'NG', name: 'Nigeria' },
-    stadiumId: 'atandt', kickoffUtc: '2026-06-12T20:00:00Z',
+    homeTeam: { countryCode: 'CO', name: 'Colombia' },
+    awayTeam: { countryCode: 'UZ', name: 'Uzbekistan' },
+    stadiumId: 'atandt', kickoffUtc: '2026-06-17T23:45:00Z',
     status: 'completed', score: { home: 3, away: 1 }, attendance: 72000, referee: 'Daniele Orsato',
     manOfTheMatch: 'neymar',
     events: [

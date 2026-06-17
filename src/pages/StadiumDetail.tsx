@@ -1,3 +1,4 @@
+import { useTournamentStore } from '../store/tournamentStore';
 import React, { useMemo } from 'react';
 import { useParams, Link } from 'react-router-dom';
 import { motion } from 'framer-motion';
@@ -19,7 +20,7 @@ import {
   Building2,
 } from 'lucide-react';
 import { STADIUMS } from '../data/stadiums';
-import { MATCHES } from '../data/matches';
+
 import type { Match, MatchStage } from '../types';
 
 const formatCapacity = (cap: number) => cap.toLocaleString();
@@ -226,6 +227,8 @@ const SpecRow: React.FC<{ icon: React.ReactNode; label: string; value: React.Rea
 );
 
 export default function StadiumDetail() {
+  const { matches, players, teams } = useTournamentStore();
+
   const { stadiumId } = useParams<{ stadiumId: string }>();
 
   const stadium = useMemo(
@@ -234,7 +237,7 @@ export default function StadiumDetail() {
   );
 
   const stadiumMatches = useMemo(
-    () => MATCHES.filter((m) => m.stadiumId === stadiumId)
+    () => matches.filter((m) => m.stadiumId === stadiumId)
       .sort((a, b) => new Date(a.kickoffUtc).getTime() - new Date(b.kickoffUtc).getTime()),
     [stadiumId],
   );

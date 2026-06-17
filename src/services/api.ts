@@ -2,142 +2,123 @@ import axios from 'axios';
 import { MATCHES } from '../data/matches';
 import { TEAMS } from '../data/teams';
 import { PLAYERS } from '../data/players';
-import type { Match, Team, Player } from '../types';
+import type { Match, Team, Player, MatchEvent } from '../types';
 
-const API_KEY = import.meta.env.VITE_API_FOOTBALL_KEY;
-const BASE_URL = 'https://v3.football.api-sports.io';
+const ESPN_API_BASE = 'https://site.api.espn.com/apis/site/v2/sports/soccer/fifa.world';
 
-const apiClient = axios.create({
-  baseURL: BASE_URL,
-  headers: {
-    'x-apisports-key': API_KEY,
-  },
-});
+// Helper to determine stage from ESPN slug
+function parseStage(slug: string): Match['stage'] {
+  if (slug?.includes('group')) return 'group';
+  if (slug?.includes('round-of-32')) return 'r32';
+  if (slug?.includes('round-of-16')) return 'r16';
+  if (slug?.includes('quarterfinals')) return 'qf';
+  if (slug?.includes('semifinals')) return 'sf';
+  if (slug?.includes('3rd-place')) return 'third';
+  if (slug?.includes('final')) return 'final';
+  return 'group';
+}
 
 export const fetchMatches = async (): Promise<Match[]> => {
-  if (!API_KEY) {
-    console.warn('API key not found, using fallback matches data.');
-    return Promise.resolve(MATCHES);
-  }
-
   try {
-    // In a real scenario, you would map the API-Sports response 
-    // to your internal Match interface. Since the World Cup 2026 
-    // hasn't started and we want compatibility, if the API call 
-    // fails or returns empty data for the specific league, we fall back.
-    const response = await apiClient.get('/fixtures', {
-      params: { league: 1, season: 2026 } // World Cup league ID is typically 1
-    });
+    const response = await axios.get(`${ESPN_API_BASE}/scoreboard?dates=2026&limit=200`);
+    if (response.data?.events?.length > 0) {
+      return response.data.events.map((ev: any, index: number) => {
+        const homeComp = ev.competitions[0].competitors.find((c: any) => c.homeAway === 'home');
+        const awayComp = ev.competitions[0].competitors.find((c: any) => c.homeAway === 'away');
+        
+        let status: Match['status'] = 'scheduled';
+        const state = ev.status.type.state; // 'pre', 'in', 'post'
+        if (state === 'in') status = 'live';
+        if (state === 'post') status = 'completed';
 
-    if (response.data.results > 0) {
-      // Map API response to our Match interface
-      // Note: This is simplified. You would need proper mapping.
-      const mappedMatches = response.data.response.map((f: any) => ({
-        id: String(f.fixture.id),
-        stage: 'group', // simplified
-        matchNumber: f.fixture.id,
-        homeTeam: { name: f.teams.home.name, countryCode: f.teams.home.name.substring(0, 2).toUpperCase() },
-        awayTeam: { name: f.teams.away.name, countryCode: f.teams.away.name.substring(0, 2).toUpperCase() },
-        stadiumId: 'sofi',
-        kickoffUtc: f.fixture.date,
-        status: f.fixture.status.short === 'FT' ? 'completed' : 'scheduled',
-        score: { home: f.goals.home || 0, away: f.goals.away || 0 },
-        events: [], // map events if needed
-      }));
-      return mappedMatches;
-    } else {
-      console.log('No matches found in API, falling back to mock data.');
-      return MATCHES;
+        // Parse events (goals, cards) from details array if available
+        const events: MatchEvent[] = [];
+        if (ev.competitions[0].details) {
+          ev.competitions[0].details.forEach((d: any) => {
+            const teamSide = d.team?.id === homeComp?.team?.id ? 'home' : 'away';
+            let type: MatchEvent['type'] = 'goal';
+            if (d.type.text.includes('Yellow Card')) type = 'yellow_card';
+            if (d.type.text.includes('Red Card')) type = 'red_card';
+            if (d.type.text.includes('Own Goal')) type = 'own_goal';
+            if (d.type.text.includes('Penalty')) type = 'penalty';
+
+            const playerInvolved = d.athletesInvolved?.[0]?.shortName || 'Unknown Player';
+
+            events.push({
+              id: `ev_${d.clock.value}`,
+              type,
+              minute: Math.floor(d.clock.value / 60) || 0,
+              team: teamSide,
+              playerName: playerInvolved,
+              description: d.type.text,
+            });
+          });
+        }
+
+        return {
+          id: String(ev.id),
+          stage: parseStage(ev.season?.slug),
+          groupId: ev.season?.slug?.includes('group') ? 'A' : undefined, // Simplify group ID
+          matchNumber: index + 1,
+          homeTeam: {
+            countryCode: homeComp?.team?.abbreviation || 'TBA',
+            name: homeComp?.team?.name || 'TBA',
+          },
+          awayTeam: {
+            countryCode: awayComp?.team?.abbreviation || 'TBA',
+            name: awayComp?.team?.name || 'TBA',
+          },
+          stadiumId: ev.competitions[0].venue?.displayName || 'Unknown Stadium',
+          kickoffUtc: ev.date,
+          status,
+          score: state !== 'pre' ? {
+            home: parseInt(homeComp?.score || '0', 10),
+            away: parseInt(awayComp?.score || '0', 10)
+          } : undefined,
+          liveMinute: state === 'in' ? Math.floor(ev.status.clock / 60) : undefined,
+          events: events,
+        };
+      });
     }
   } catch (error) {
-    console.error('Error fetching matches:', error);
-    console.warn('Falling back to local match data.');
-    return MATCHES;
+    console.error('Error fetching matches from ESPN:', error);
   }
+  return MATCHES;
 };
 
 export const fetchTeams = async (): Promise<Team[]> => {
-  if (!API_KEY) {
-    return Promise.resolve(TEAMS);
-  }
-
   try {
-    const response = await apiClient.get('/teams', {
-      params: { league: 1, season: 2026 }
-    });
-
-    if (response.data.results > 0) {
-      // Basic mapping strategy
-      return response.data.response.map((t: any) => {
-        const fallbackTeam = TEAMS.find(ft => ft.name === t.team.name);
+    const response = await axios.get(`${ESPN_API_BASE}/teams?limit=100`);
+    if (response.data?.sports?.[0]?.leagues?.[0]?.teams?.length > 0) {
+      return response.data.sports[0].leagues[0].teams.map((t: any) => {
+        const teamData = t.team;
         return {
-          countryCode: fallbackTeam?.countryCode || t.team.name.substring(0, 2).toUpperCase(),
-          name: t.team.name,
-          flag: t.team.logo,
-          confederation: fallbackTeam?.confederation || 'UEFA',
-          fifaRanking: fallbackTeam?.fifaRanking || 0,
-          groupId: fallbackTeam?.groupId || 'A',
-          manager: fallbackTeam?.manager || 'Unknown',
-          managerNationality: fallbackTeam?.managerNationality || 'Unknown',
-          squadSize: fallbackTeam?.squadSize || 26,
-          avgAge: fallbackTeam?.avgAge || 26.5,
-          keyPlayerId: fallbackTeam?.keyPlayerId || '',
-          wins: fallbackTeam?.wins || 0,
-          draws: fallbackTeam?.draws || 0,
-          losses: fallbackTeam?.losses || 0,
-          goalsFor: fallbackTeam?.goalsFor || 0,
-          goalsAgainst: fallbackTeam?.goalsAgainst || 0,
-          points: fallbackTeam?.points || 0,
-          matchesPlayed: fallbackTeam?.matchesPlayed || 0,
-          primaryColor: fallbackTeam?.primaryColor || '#000000',
-          secondaryColor: fallbackTeam?.secondaryColor || '#ffffff',
+          countryCode: teamData.abbreviation || 'XX',
+          name: teamData.displayName || teamData.name,
+          flag: teamData.logos?.[0]?.href || '',
+          confederation: 'FIFA',
+          fifaRanking: 0,
+          groupId: 'A',
+          manager: 'Unknown',
+          managerNationality: 'Unknown',
+          squadSize: 26,
+          avgAge: 26.5,
+          keyPlayerId: '',
+          wins: 0, draws: 0, losses: 0, goalsFor: 0, goalsAgainst: 0, points: 0, matchesPlayed: 0,
+          primaryColor: `#${teamData.color || '000000'}`,
+          secondaryColor: `#${teamData.alternateColor || 'ffffff'}`,
         };
       });
     }
-    return TEAMS;
   } catch (error) {
-    console.error('Error fetching teams:', error);
-    return TEAMS;
+    console.error('Error fetching teams from ESPN:', error);
   }
+  return TEAMS;
 };
 
 export const fetchPlayers = async (): Promise<Player[]> => {
-  if (!API_KEY) {
-    return Promise.resolve(PLAYERS);
-  }
-
-  try {
-    const response = await apiClient.get('/players', {
-      params: { league: 1, season: 2026 }
-    });
-
-    if (response.data.results > 0) {
-      return response.data.response.map((p: any) => {
-        const fallbackPlayer = PLAYERS.find(fp => fp.name === p.player.name);
-        return {
-          id: String(p.player.id),
-          name: p.player.name,
-          countryCode: fallbackPlayer?.countryCode || 'XX',
-          dateOfBirth: p.player.birth.date || '1990-01-01',
-          position: p.statistics[0]?.games?.position || 'MID',
-          clubName: p.statistics[0]?.team?.name || 'Unknown',
-          jerseyNumber: p.statistics[0]?.games?.number || 10,
-          photoUrl: p.player.photo,
-          height: p.player.height ? parseInt(p.player.height) : 180,
-          weight: p.player.weight ? parseInt(p.player.weight) : 75,
-          tournamentStats: fallbackPlayer?.tournamentStats || {
-            matchesPlayed: 0, minutesPlayed: 0, goals: 0, goalsHeader: 0,
-            goalsFreekick: 0, goalsPenalty: 0, assists: 0, keyPasses: 0,
-            shotsTotal: 0, shotsOnTarget: 0, xG: 0, xA: 0, passCompletionPct: 0,
-            tacklesWon: 0, interceptions: 0, clearances: 0, aerialDuelsWonPct: 0,
-            yellowCards: 0, redCards: 0, avgRating: 0, manOfTheMatchAwards: 0, distanceCoveredAvg: 0
-          }
-        };
-      });
-    }
-    return PLAYERS;
-  } catch (error) {
-    console.error('Error fetching players:', error);
-    return PLAYERS;
-  }
+  // ESPN doesn't provide a flat list of all tournament players easily.
+  // We'll fall back to our highly realistic mock data for players.
+  return Promise.resolve(PLAYERS);
 };
+

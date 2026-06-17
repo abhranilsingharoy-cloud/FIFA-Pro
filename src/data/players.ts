@@ -5,12 +5,12 @@ export const PLAYERS: Player[] = [
   {
     id: 'ronaldo', name: 'Cristiano Ronaldo', countryCode: 'PT', dateOfBirth: '1985-02-05',
     position: 'FWD', clubName: 'Al Nassr', jerseyNumber: 7, height: 187, weight: 83, isLegend: true,
-    tournamentStats: { matchesPlayed: 5, minutesPlayed: 450, goals: 6, goalsHeader: 1, goalsFreekick: 1, goalsPenalty: 2, assists: 2, keyPasses: 14, shotsTotal: 28, shotsOnTarget: 14, xG: 4.8, xA: 1.9, passCompletionPct: 84, tacklesWon: 3, interceptions: 1, clearances: 1, aerialDuelsWonPct: 61, yellowCards: 0, redCards: 0, avgRating: 8.1, manOfTheMatchAwards: 2, distanceCoveredAvg: 9.8, progressivePasses: 12, crosses: 8, throughBalls: 3, blockedShots: 0, pressuresApplied: 22, sprintDistance: 2.1, maxSpeed: 34.1 }
+    tournamentStats: { matchesPlayed: 2, minutesPlayed: 180, goals: 2, goalsHeader: 1, goalsFreekick: 0, goalsPenalty: 1, assists: 1, keyPasses: 4, shotsTotal: 10, shotsOnTarget: 5, xG: 1.8, xA: 0.9, passCompletionPct: 84, tacklesWon: 1, interceptions: 0, clearances: 0, aerialDuelsWonPct: 61, yellowCards: 0, redCards: 0, avgRating: 8.1, manOfTheMatchAwards: 1, distanceCoveredAvg: 9.8, progressivePasses: 4, crosses: 2, throughBalls: 1, blockedShots: 0, pressuresApplied: 8, sprintDistance: 2.1, maxSpeed: 34.1 }
   },
   {
     id: 'messi', name: 'Lionel Messi', countryCode: 'AR', dateOfBirth: '1987-06-24',
     position: 'FWD', clubName: 'Inter Miami', jerseyNumber: 10, height: 170, weight: 72, isLegend: true,
-    tournamentStats: { matchesPlayed: 5, minutesPlayed: 450, goals: 5, goalsHeader: 0, goalsFreekick: 1, goalsPenalty: 1, assists: 7, keyPasses: 31, shotsTotal: 22, shotsOnTarget: 11, xG: 4.1, xA: 5.8, passCompletionPct: 89, tacklesWon: 6, interceptions: 2, clearances: 0, aerialDuelsWonPct: 28, yellowCards: 1, redCards: 0, avgRating: 9.0, manOfTheMatchAwards: 4, distanceCoveredAvg: 9.2, progressivePasses: 28, crosses: 15, throughBalls: 9, blockedShots: 0, pressuresApplied: 18, sprintDistance: 1.6, maxSpeed: 31.2 }
+    tournamentStats: { matchesPlayed: 2, minutesPlayed: 180, goals: 1, goalsHeader: 0, goalsFreekick: 1, goalsPenalty: 0, assists: 3, keyPasses: 11, shotsTotal: 8, shotsOnTarget: 4, xG: 1.1, xA: 2.8, passCompletionPct: 89, tacklesWon: 2, interceptions: 1, clearances: 0, aerialDuelsWonPct: 28, yellowCards: 0, redCards: 0, avgRating: 9.0, manOfTheMatchAwards: 1, distanceCoveredAvg: 9.2, progressivePasses: 12, crosses: 5, throughBalls: 3, blockedShots: 0, pressuresApplied: 8, sprintDistance: 1.6, maxSpeed: 31.2 }
   },
   {
     id: 'neymar', name: 'Neymar Jr.', countryCode: 'BR', dateOfBirth: '1992-02-05',
@@ -25,7 +25,7 @@ export const PLAYERS: Player[] = [
   {
     id: 'mbappe', name: 'Kylian Mbappé', countryCode: 'FR', dateOfBirth: '1998-12-20',
     position: 'FWD', clubName: 'Real Madrid', jerseyNumber: 10, height: 178, weight: 73, isLegend: true,
-    tournamentStats: { matchesPlayed: 5, minutesPlayed: 450, goals: 7, goalsHeader: 0, goalsFreekick: 0, goalsPenalty: 2, assists: 3, keyPasses: 19, shotsTotal: 32, shotsOnTarget: 17, xG: 5.9, xA: 2.8, passCompletionPct: 82, tacklesWon: 5, interceptions: 2, clearances: 0, aerialDuelsWonPct: 35, yellowCards: 1, redCards: 0, avgRating: 8.5, manOfTheMatchAwards: 3, distanceCoveredAvg: 10.8, progressivePasses: 14, crosses: 10, throughBalls: 6, blockedShots: 0, pressuresApplied: 30, sprintDistance: 3.1, maxSpeed: 38.6 }
+    tournamentStats: { matchesPlayed: 2, minutesPlayed: 180, goals: 2, goalsHeader: 0, goalsFreekick: 0, goalsPenalty: 1, assists: 1, keyPasses: 9, shotsTotal: 12, shotsOnTarget: 7, xG: 2.9, xA: 1.8, passCompletionPct: 82, tacklesWon: 2, interceptions: 1, clearances: 0, aerialDuelsWonPct: 35, yellowCards: 0, redCards: 0, avgRating: 8.5, manOfTheMatchAwards: 1, distanceCoveredAvg: 10.8, progressivePasses: 6, crosses: 4, throughBalls: 2, blockedShots: 0, pressuresApplied: 12, sprintDistance: 3.1, maxSpeed: 38.6 }
   },
   {
     id: 'modric', name: 'Luka Modrić', countryCode: 'HR', dateOfBirth: '1985-09-09',
@@ -50,7 +50,7 @@ export const PLAYERS: Player[] = [
   {
     id: 'haaland', name: 'Erling Haaland', countryCode: 'NO', dateOfBirth: '2000-07-21',
     position: 'FWD', clubName: 'Manchester City', jerseyNumber: 9, height: 194, weight: 88, isLegend: true,
-    tournamentStats: { matchesPlayed: 5, minutesPlayed: 450, goals: 8, goalsHeader: 3, goalsFreekick: 0, goalsPenalty: 1, assists: 2, keyPasses: 8, shotsTotal: 30, shotsOnTarget: 18, xG: 7.2, xA: 1.6, passCompletionPct: 72, tacklesWon: 2, interceptions: 1, clearances: 2, aerialDuelsWonPct: 75, yellowCards: 1, redCards: 0, avgRating: 8.8, manOfTheMatchAwards: 3, distanceCoveredAvg: 9.6, progressivePasses: 5, crosses: 2, throughBalls: 1, blockedShots: 0, pressuresApplied: 15, sprintDistance: 2.0, maxSpeed: 36.0 }
+    tournamentStats: { matchesPlayed: 2, minutesPlayed: 180, goals: 3, goalsHeader: 1, goalsFreekick: 0, goalsPenalty: 0, assists: 1, keyPasses: 4, shotsTotal: 10, shotsOnTarget: 6, xG: 3.2, xA: 0.6, passCompletionPct: 72, tacklesWon: 1, interceptions: 0, clearances: 1, aerialDuelsWonPct: 75, yellowCards: 0, redCards: 0, avgRating: 8.8, manOfTheMatchAwards: 2, distanceCoveredAvg: 9.6, progressivePasses: 2, crosses: 1, throughBalls: 0, blockedShots: 0, pressuresApplied: 6, sprintDistance: 2.0, maxSpeed: 36.0 }
   },
   // Additional non-legend players
   {

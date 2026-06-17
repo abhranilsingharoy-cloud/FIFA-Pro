@@ -1,8 +1,9 @@
+import { useTournamentStore } from '../store/tournamentStore';
 import { useState, useMemo } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { motion, AnimatePresence } from 'framer-motion';
 import { Search, Trophy, Users, ChevronUp, ChevronDown, Shield } from 'lucide-react';
-import { TEAMS } from '../data/teams';
+
 import type { Team, Confederation } from '../types';
 
 type SortKey = 'ranking' | 'goals' | 'points' | 'alpha';
@@ -48,13 +49,15 @@ function dedupeTeams(teams: Team[]): Team[] {
 }
 
 export default function Teams() {
+  const { matches, players, teams } = useTournamentStore();
+
   const navigate = useNavigate();
   const [search, setSearch] = useState('');
   const [confederation, setConfederation] = useState<Confederation | 'ALL'>('ALL');
   const [sortKey, setSortKey] = useState<SortKey>('points');
   const [sortDir, setSortDir] = useState<'asc' | 'desc'>('desc');
 
-  const allTeams = useMemo(() => dedupeTeams(TEAMS), []);
+  const allTeams = useMemo(() => dedupeTeams(teams), []);
 
   const maxGoalsFor = useMemo(() => Math.max(...allTeams.map(t => t.goalsFor), 1), [allTeams]);
   const maxGoalsAgainst = useMemo(() => Math.max(...allTeams.map(t => t.goalsAgainst), 1), [allTeams]);

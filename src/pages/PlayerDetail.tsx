@@ -1,21 +1,24 @@
+import { useTournamentStore } from '../store/tournamentStore';
 import { useParams } from 'react-router-dom';
 import { motion } from 'framer-motion';
-import { PLAYERS } from '../data/players';
+
 import { LEGENDS } from '../data/legends';
-import { MATCHES } from '../data/matches';
+
 import { LineChart, Line, XAxis, YAxis, CartesianGrid, Tooltip, ResponsiveContainer } from 'recharts';
 import CountryFlag from '../components/ui/CountryFlag';
 import StatBar from '../components/ui/StatBar';
 import { Crown, Activity, Target } from 'lucide-react';
 
 export default function PlayerDetail() {
+  const { matches, players, teams } = useTournamentStore();
+
   const { playerId } = useParams();
-  const player = PLAYERS.find(p => p.id === playerId);
+  const player = players.find(p => p.id === playerId);
   const legend = LEGENDS.find(l => l.id === playerId);
   
   if (!player) return <div style={{ padding: 40, textAlign: 'center', color: 'white' }}>Player not found.</div>;
 
-  const playerMatches = MATCHES.filter(m => 
+  const playerMatches = matches.filter(m => 
     (m.homeTeam.countryCode === player.countryCode || m.awayTeam.countryCode === player.countryCode) && 
     m.status === 'completed'
   );
