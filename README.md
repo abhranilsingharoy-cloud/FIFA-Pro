@@ -1,5 +1,5 @@
 <div align="center">
-  <img src="https://upload.wikimedia.org/wikipedia/en/5/53/2026_FIFA_World_Cup_logo.svg" alt="FIFA World Cup 2026 Logo" width="150" />
+  <img src="https://share.google/QO6TMuy3NBHPBHrET" alt="FIFA World Cup 2026 Logo" width="150" />
   <h1>FIFA World Cup 2026 Hub</h1>
   
   <p>
