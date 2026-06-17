@@ -143,7 +143,7 @@ export default function Dashboard() {
   const [liveMinute, setLiveMinute] = useState(67);
   const tickRef = useRef<ReturnType<typeof setInterval> | null>(null);
 
-  const liveMatch = matches.find(m => m.status === 'live') ?? matches[1];
+  const liveMatch = matches.find(m => m.status === 'live') ?? matches[0] ?? null;
   const completedMatches = matches.filter(m => m.status === 'completed');
   const todayMatches = matches.slice(0, 4);
   const recentResults = completedMatches.slice(-5).reverse();
@@ -156,8 +156,40 @@ export default function Dashboard() {
     return () => { if (tickRef.current) clearInterval(tickRef.current); };
   }, []);
 
-  // Leaderboard data
-  const sortedByGoals = [...players].sort((a, b) => b.tournamentStats.goals - a.tournamentStats.goals).slice(0, 5);
+  // Leaderboard data calculation
+  // Build a robust leaderboard from dynamic events
+  const playerMap: Record<string, { name: string, goals: number, countryCode: string, clubName: string }> = {};
+  matches.forEach(m => {
+    if (m.status === 'completed' || m.status === 'live') {
+      m.events.forEach(ev => {
+        if ((ev.type === 'goal' || ev.type === 'penalty') && ev.playerName) {
+          if (!playerMap[ev.playerName]) {
+            playerMap[ev.playerName] = { 
+              name: ev.playerName, 
+              goals: 0, 
+              countryCode: ev.team === 'home' ? m.homeTeam.countryCode : m.awayTeam.countryCode, 
+              clubName: 'National Team' 
+            };
+          }
+          playerMap[ev.playerName].goals += 1;
+        }
+      });
+    }
+  });
+
+  const realTopScorers = Object.values(playerMap).sort((a, b) => b.goals - a.goals).slice(0, 5).map((p, i) => ({
+    id: `dyn_${i}`,
+    name: p.name,
+    countryCode: p.countryCode,
+    clubName: p.clubName,
+    dateOfBirth: '2000-01-01',
+    position: 'Forward' as any,
+    jerseyNumber: 9,
+    tournamentStats: { goals: p.goals, assists: 0, avgRating: 0 } as any,
+    isLegend: false
+  }));
+
+  const sortedByGoals = realTopScorers.length > 0 ? realTopScorers : [...players].sort((a, b) => b.tournamentStats.goals - a.tournamentStats.goals).slice(0, 5);
   const sortedByAssists = [...players].sort((a, b) => b.tournamentStats.assists - a.tournamentStats.assists).slice(0, 5);
   const sortedByRating = [...players].sort((a, b) => b.tournamentStats.avgRating - a.tournamentStats.avgRating).slice(0, 5);
 
@@ -171,6 +203,49 @@ export default function Dashboard() {
     : p.tournamentStats.avgRating;
 
   const leaderboardMax = Math.max(...leaderboardData.map(p => leaderboardStat(p)));
+
+  // Dynamic KPI Calculations
+  let totalGoals = 0;
+  let totalYellowCards = 0;
+  let totalRedCards = 0;
+  let matchesPlayed = 0;
+
+  const playerGoalMap: Record<string, number> = {};
+
+  matches.forEach(m => {
+    if (m.status === 'completed' || m.status === 'live') {
+      matchesPlayed++;
+      totalGoals += (m.score?.home || 0) + (m.score?.away || 0);
+      
+      m.events.forEach(ev => {
+        if (ev.type === 'yellow_card') totalYellowCards++;
+        if (ev.type === 'red_card') totalRedCards++;
+        if ((ev.type === 'goal' || ev.type === 'penalty') && ev.playerName) {
+          playerGoalMap[ev.playerName] = (playerGoalMap[ev.playerName] || 0) + 1;
+        }
+      });
+    }
+  });
+
+  const avgGoals = matchesPlayed > 0 ? (totalGoals / matchesPlayed).toFixed(2) : '0.00';
+
+  let topScorerName = '';
+  let topScorerGoals = 0;
+  Object.entries(playerGoalMap).forEach(([name, goals]) => {
+    if (goals > topScorerGoals) {
+      topScorerGoals = goals;
+      topScorerName = name;
+    }
+  });
+
+  // Fallback top scorer from players array if no live goals
+  if (topScorerGoals === 0 && sortedByGoals.length > 0) {
+    topScorerName = sortedByGoals[0].name;
+    topScorerGoals = sortedByGoals[0].tournamentStats.goals;
+  }
+
+  const topAssisterName = sortedByAssists.length > 0 ? sortedByAssists[0].name : '';
+  const topAssisterAssists = sortedByAssists.length > 0 ? sortedByAssists[0].tournamentStats.assists : 0;
 
   return (
     <div className="page-container">
@@ -242,18 +317,19 @@ export default function Dashboard() {
 
       {/* ─── KPI GRID ─────────────────────────────────────────────────── */}
       <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(180px, 1fr))', gap: 16, marginBottom: 28 }}>
-        <KpiCard icon={Target} label="Total Goals" value="156" sub="Tournament total" color="#C8102E" delay={0.05} />
-        <KpiCard icon={Star} label="Top Scorer" value="8" sub="Haaland (NOR)" color="#FFD700" delay={0.10} />
-        <KpiCard icon={Handshake} label="Top Assister" value="7" sub="Messi (ARG)" color="#22C55E" delay={0.15} />
-        <KpiCard icon={Calendar} label="Matches Played" value="47/104" sub="Group Stage" color="#3B82F6" delay={0.20} />
-        <KpiCard icon={TrendingUp} label="Avg Goals/Match" value="3.32" sub="+0.4 vs 2022" color="#F59E0B" delay={0.25} />
-        <KpiCard icon={CreditCard} label="Disciplinary" value="89 / 4" sub="Yellow / Red cards" color="#EF4444" delay={0.30} />
+        <KpiCard icon={Target} label="Total Goals" value={String(totalGoals)} sub="Tournament total" color="#C8102E" delay={0.05} />
+        <KpiCard icon={Star} label="Top Scorer" value={topScorerName || '-'} sub={topScorerName ? `${topScorerGoals} goals` : 'N/A'} color="#FFD700" delay={0.10} />
+        <KpiCard icon={Handshake} label="Top Assister" value={topAssisterName || '-'} sub={topAssisterName ? `${topAssisterAssists} assists` : 'N/A'} color="#22C55E" delay={0.15} />
+        <KpiCard icon={Calendar} label="Matches Played" value={`${matchesPlayed}/${matches.length || 104}`} sub="Overall" color="#3B82F6" delay={0.20} />
+        <KpiCard icon={TrendingUp} label="Avg Goals/Match" value={avgGoals} sub="Per match" color="#F59E0B" delay={0.25} />
+        <KpiCard icon={CreditCard} label="Disciplinary" value={`${totalYellowCards} / ${totalRedCards}`} sub="Yellow / Red cards" color="#EF4444" delay={0.30} />
       </div>
 
       {/* ─── TWO-COLUMN: LIVE MATCH + SCHEDULE ────────────────────────── */}
       <div style={{ display: 'grid', gridTemplateColumns: '1fr 380px', gap: 20, marginBottom: 28 }}>
 
         {/* Live Match Scoreboard */}
+        {liveMatch ? (
         <motion.div
           initial={{ opacity: 0, y: 20 }}
           animate={{ opacity: 1, y: 0 }}
@@ -269,19 +345,27 @@ export default function Dashboard() {
             display: 'flex', alignItems: 'center', justifyContent: 'space-between'
           }}>
             <div style={{ display: 'flex', alignItems: 'center', gap: 10 }}>
-              <span className="badge badge-live">
-                <span className="live-dot" style={{ marginRight: 5 }} /> LIVE
-              </span>
+              {liveMatch.status === 'live' ? (
+                <span className="badge badge-live">
+                  <span className="live-dot" style={{ marginRight: 5 }} /> LIVE
+                </span>
+              ) : liveMatch.status === 'completed' ? (
+                <span className="badge badge-green">FT</span>
+              ) : (
+                <span className="badge badge-amber">UPCOMING</span>
+              )}
               <span style={{ fontSize: 13, color: 'var(--text-muted)' }}>
                 {STAGE_MAP[liveMatch.stage] ?? 'Group Stage'} — Match {liveMatch.matchNumber}
               </span>
             </div>
-            <div style={{ display: 'flex', alignItems: 'center', gap: 6, fontSize: 13 }}>
-              <Clock size={14} style={{ color: 'var(--brand-red)' }} />
-              <span style={{ fontFamily: 'JetBrains Mono, monospace', color: 'var(--live-red)', fontWeight: 700 }}>
-                {liveMinute}'
-              </span>
-            </div>
+            {liveMatch.status === 'live' && (
+              <div style={{ display: 'flex', alignItems: 'center', gap: 6, fontSize: 13 }}>
+                <Clock size={14} style={{ color: 'var(--brand-red)' }} />
+                <span style={{ fontFamily: 'JetBrains Mono, monospace', color: 'var(--live-red)', fontWeight: 700 }}>
+                  {liveMatch.liveMinute || liveMinute}'
+                </span>
+              </div>
+            )}
           </div>
 
           {/* Scoreboard */}
@@ -321,10 +405,22 @@ export default function Dashboard() {
                   </span>
                 </div>
                 <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'center', gap: 6, marginTop: 6 }}>
-                  <span className="live-dot" />
-                  <span style={{ fontSize: 13, color: 'var(--live-red)', fontWeight: 700, fontFamily: 'JetBrains Mono, monospace' }}>
-                    {liveMinute}' — LIVE
-                  </span>
+                  {liveMatch.status === 'live' ? (
+                    <>
+                      <span className="live-dot" />
+                      <span style={{ fontSize: 13, color: 'var(--live-red)', fontWeight: 700, fontFamily: 'JetBrains Mono, monospace' }}>
+                        {liveMatch.liveMinute || liveMinute}' — LIVE
+                      </span>
+                    </>
+                  ) : liveMatch.status === 'completed' ? (
+                    <span style={{ fontSize: 13, color: 'var(--text-muted)', fontWeight: 700, fontFamily: 'JetBrains Mono, monospace' }}>
+                      FULL TIME
+                    </span>
+                  ) : (
+                    <span style={{ fontSize: 13, color: 'var(--brand-gold)', fontWeight: 700, fontFamily: 'JetBrains Mono, monospace' }}>
+                      {formatKickoff(liveMatch.kickoffUtc)}
+                    </span>
+                  )}
                 </div>
               </div>
 
@@ -407,6 +503,11 @@ export default function Dashboard() {
             </div>
           )}
         </motion.div>
+        ) : (
+          <div className="card" style={{ display: 'flex', alignItems: 'center', justifyContent: 'center', color: 'var(--text-muted)' }}>
+            No matches available
+          </div>
+        )}
 
         {/* Today's Schedule */}
         <motion.div
@@ -671,7 +772,7 @@ export default function Dashboard() {
             <div style={{ height: 8, borderRadius: 4, background: 'var(--surface-card)', overflow: 'hidden', marginBottom: 6 }}>
               <motion.div
                 initial={{ width: 0 }}
-                whileInView={{ width: '45%' }}
+                whileInView={{ width: `${Math.round((matchesPlayed / (matches.length || 104)) * 100)}%` }}
                 viewport={{ once: true }}
                 transition={{ duration: 1.2, ease: 'easeOut' }}
                 style={{ height: '100%', borderRadius: 4, background: 'linear-gradient(90deg, var(--brand-red), var(--brand-gold))' }}
@@ -679,7 +780,9 @@ export default function Dashboard() {
             </div>
             <div style={{ display: 'flex', justifyContent: 'space-between', fontSize: 12, color: 'var(--text-muted)' }}>
               <span>Matchday 1</span>
-              <span style={{ color: 'var(--brand-gold)', fontFamily: 'JetBrains Mono, monospace', fontWeight: 700 }}>45%</span>
+              <span style={{ color: 'var(--brand-gold)', fontFamily: 'JetBrains Mono, monospace', fontWeight: 700 }}>
+                {Math.round((matchesPlayed / (matches.length || 104)) * 100)}%
+              </span>
               <span>July 19 Final</span>
             </div>
           </div>

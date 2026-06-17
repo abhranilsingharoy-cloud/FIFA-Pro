@@ -19,6 +19,10 @@ const StadiumDetail = lazy(() => import('./pages/StadiumDetail'));
 const Standings = lazy(() => import('./pages/Standings'));
 const Stats = lazy(() => import('./pages/Stats'));
 const Prizes = lazy(() => import('./pages/Prizes'));
+const Compare = lazy(() => import('./pages/Compare'));
+const Bracket = lazy(() => import('./pages/Bracket'));
+const GlobalMap = lazy(() => import('./pages/Map'));
+const News = lazy(() => import('./pages/News'));
 
 function LoadingFallback() {
   return (
@@ -76,6 +80,10 @@ function AppContent() {
               <Route path="/standings" element={<Standings />} />
               <Route path="/stats" element={<Stats />} />
               <Route path="/prizes" element={<Prizes />} />
+              <Route path="/compare" element={<Compare />} />
+              <Route path="/bracket" element={<Bracket />} />
+              <Route path="/map" element={<GlobalMap />} />
+              <Route path="/news" element={<News />} />
             </Routes>
           </Suspense>
         </AppShell>

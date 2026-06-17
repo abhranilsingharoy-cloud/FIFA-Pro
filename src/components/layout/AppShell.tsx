@@ -3,7 +3,8 @@ import { NavLink, useLocation } from 'react-router-dom';
 import { motion, AnimatePresence } from 'framer-motion';
 import {
   LayoutDashboard, Calendar, Globe, Users, Trophy,
-  BarChart3, MapPin, DollarSign, List, Zap, Menu, X, Cpu
+  BarChart3, MapPin, DollarSign, List, Zap, Menu, X, Cpu,
+  GitMerge, Swords, Map, Newspaper
 } from 'lucide-react';
 import { useTournamentStore } from '../../store/tournamentStore';
 import LiveTicker from './LiveTicker';
@@ -14,9 +15,13 @@ const navItems = [
   { path: '/teams', label: 'Teams', icon: Globe },
   { path: '/players', label: 'Players', icon: Users },
   { path: '/matches', label: 'Matches', icon: List },
+  { path: '/bracket', label: 'Bracket', icon: GitMerge },
   { path: '/standings', label: 'Standings', icon: Trophy },
   { path: '/stadiums', label: 'Venues', icon: MapPin },
+  { path: '/map', label: 'Map', icon: Map },
   { path: '/stats', label: 'Stats', icon: BarChart3 },
+  { path: '/compare', label: 'Compare', icon: Swords },
+  { path: '/news', label: 'News', icon: Newspaper },
   { path: '/prizes', label: 'Prizes', icon: DollarSign },
 ];
 
