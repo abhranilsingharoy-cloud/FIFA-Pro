@@ -2,7 +2,8 @@ import { BrowserRouter, Routes, Route } from 'react-router-dom';
 import AppShell from './components/layout/AppShell';
 import WorldCupScene3D from './components/3d/WorldCupScene3D';
 import './styles/globals.css';
-import { lazy, Suspense, useEffect, Component, ReactNode } from 'react';
+import { lazy, Suspense, useEffect, Component } from 'react';
+import type { ReactNode } from 'react';
 import { useTournamentStore } from './store/tournamentStore';
 
 class ErrorBoundary extends Component<{children: ReactNode}, {hasError: boolean, error: Error | null}> {
