@@ -2,7 +2,7 @@ import { BrowserRouter, Routes, Route } from 'react-router-dom';
 import AppShell from './components/layout/AppShell';
 import WorldCupScene3D from './components/3d/WorldCupScene3D';
 import './styles/globals.css';
-import { lazy, Suspense } from 'react';
+import { lazy, Suspense, useEffect } from 'react';
 import { useTournamentStore } from './store/tournamentStore';
 
 // Lazy-loaded pages
@@ -30,8 +30,29 @@ function LoadingFallback() {
   );
 }
 
+function GlobalLoader() {
+  return (
+    <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'center', height: '100vh', width: '100vw', backgroundColor: 'var(--bg-base)', flexDirection: 'column', gap: 16 }}>
+      <div style={{ width: 64, height: 64, borderRadius: '50%', border: '4px solid var(--surface-elevated)', borderTopColor: 'var(--brand-gold)', animation: 'spin 0.8s linear infinite' }} />
+      <style>{`@keyframes spin { to { transform: rotate(360deg); } }`}</style>
+      <h2 style={{ color: 'var(--text-primary)', fontFamily: 'Outfit, sans-serif', fontSize: '1.5rem' }}>Initializing World Cup Hub...</h2>
+      <p style={{ color: 'var(--text-muted)' }}>Fetching the latest data...</p>
+    </div>
+  );
+}
+
 function AppContent() {
   const performanceMode = useTournamentStore(s => s.performanceMode);
+  const isLoading = useTournamentStore(s => s.isLoading);
+  const fetchData = useTournamentStore(s => s.fetchData);
+
+  useEffect(() => {
+    fetchData();
+  }, [fetchData]);
+
+  if (isLoading) {
+    return <GlobalLoader />;
+  }
 
   return (
     <>

@@ -1,8 +1,6 @@
 import { create } from 'zustand';
-import { MATCHES } from '../data/matches';
-import { PLAYERS } from '../data/players';
-import { TEAMS } from '../data/teams';
 import type { Match, Player, Team } from '../types';
+import { fetchMatches, fetchTeams, fetchPlayers } from '../services/api';
 
 interface TournamentState {
   matches: Match[];
@@ -12,6 +10,8 @@ interface TournamentState {
   selectedTimezone: string;
   performanceMode: boolean;
   sidebarOpen: boolean;
+  isLoading: boolean;
+  error: string | null;
   // Actions
   setMatches: (matches: Match[]) => void;
   updateMatchScore: (matchId: string, homeScore: number, awayScore: number) => void;
@@ -20,16 +20,19 @@ interface TournamentState {
   togglePerformanceMode: () => void;
   toggleSidebar: () => void;
   simulateLiveUpdate: () => void;
+  fetchData: () => Promise<void>;
 }
 
 export const useTournamentStore = create<TournamentState>((set, get) => ({
-  matches: MATCHES,
-  players: PLAYERS,
-  teams: TEAMS,
-  liveMatches: MATCHES.filter(m => m.status === 'live'),
+  matches: [],
+  players: [],
+  teams: [],
+  liveMatches: [],
   selectedTimezone: Intl.DateTimeFormat().resolvedOptions().timeZone,
   performanceMode: false,
   sidebarOpen: false,
+  isLoading: true,
+  error: null,
 
   setMatches: (matches) => set({ matches, liveMatches: matches.filter(m => m.status === 'live') }),
 
@@ -66,6 +69,26 @@ export const useTournamentStore = create<TournamentState>((set, get) => ({
       })
     }));
   },
+
+  fetchData: async () => {
+    set({ isLoading: true, error: null });
+    try {
+      const [matches, teams, players] = await Promise.all([
+        fetchMatches(),
+        fetchTeams(),
+        fetchPlayers()
+      ]);
+      set({
+        matches,
+        teams,
+        players,
+        liveMatches: matches.filter(m => m.status === 'live'),
+        isLoading: false
+      });
+    } catch (err: any) {
+      set({ error: err.message || 'Failed to fetch data', isLoading: false });
+    }
+  }
 }));
 
 // Auto-simulate live updates every 60 seconds
