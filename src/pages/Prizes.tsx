@@ -1,8 +1,11 @@
 import { useTournamentStore } from '../store/tournamentStore';
 import { useEffect } from 'react';
 import { motion } from 'framer-motion';
-import CountUp from 'react-countup';
-import confetti from 'canvas-confetti';
+import CountUpModule from 'react-countup';
+import confettiModule from 'canvas-confetti';
+
+const CountUp: any = (CountUpModule as any).default || CountUpModule;
+const confetti: any = (confettiModule as any).default || confettiModule;
 import { BarChart, Bar, XAxis, YAxis, CartesianGrid, Tooltip, ResponsiveContainer, LineChart, Line } from 'recharts';
 import { PRIZE_POOL_TOTAL, PRIZE_BREAKDOWN, HISTORICAL_PRIZE_POOLS } from '../data/prizes';
 

@@ -2,8 +2,30 @@ import { BrowserRouter, Routes, Route } from 'react-router-dom';
 import AppShell from './components/layout/AppShell';
 import WorldCupScene3D from './components/3d/WorldCupScene3D';
 import './styles/globals.css';
-import { lazy, Suspense, useEffect } from 'react';
+import { lazy, Suspense, useEffect, Component, ReactNode } from 'react';
 import { useTournamentStore } from './store/tournamentStore';
+
+class ErrorBoundary extends Component<{children: ReactNode}, {hasError: boolean, error: Error | null}> {
+  constructor(props: {children: ReactNode}) {
+    super(props);
+    this.state = { hasError: false, error: null };
+  }
+  static getDerivedStateFromError(error: Error) {
+    return { hasError: true, error };
+  }
+  render() {
+    if (this.state.hasError) {
+      return (
+        <div style={{ padding: 40, color: 'white', background: '#222', minHeight: '100vh' }}>
+          <h2>Something went wrong.</h2>
+          <pre style={{ color: 'red', whiteSpace: 'pre-wrap' }}>{this.state.error?.toString()}</pre>
+          <pre style={{ color: 'orange', whiteSpace: 'pre-wrap' }}>{this.state.error?.stack}</pre>
+        </div>
+      );
+    }
+    return this.props.children;
+  }
+}
 
 // Lazy-loaded pages
 const Dashboard = lazy(() => import('./pages/Dashboard'));
@@ -61,7 +83,7 @@ function AppContent() {
   }
 
   return (
-    <>
+    <ErrorBoundary>
       {!performanceMode && <WorldCupScene3D variant="dashboard" />}
       <BrowserRouter>
         <AppShell>
@@ -88,7 +110,7 @@ function AppContent() {
           </Suspense>
         </AppShell>
       </BrowserRouter>
-    </>
+    </ErrorBoundary>
   );
 }
 
