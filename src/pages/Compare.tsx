@@ -3,10 +3,7 @@ import { motion } from 'framer-motion';
 import { Radar, RadarChart, PolarGrid, PolarAngleAxis, PolarRadiusAxis, ResponsiveContainer, Tooltip } from 'recharts';
 import { Swords, Info } from 'lucide-react';
 import { useTournamentStore } from '../store/tournamentStore';
-
-function flagUrl(code: string, size: '48x36' | '84x64' = '48x36') {
-  return `https://flagcdn.com/${size}/${code.toLowerCase()}.png`;
-}
+import CountryFlag from '../components/ui/CountryFlag';
 
 export default function Compare() {
   const { teams } = useTournamentStore();
@@ -96,7 +93,7 @@ export default function Compare() {
           </select>
           {teamA && (
             <div style={{ display: 'flex', alignItems: 'center', gap: 16, marginTop: 8 }}>
-              <img src={flagUrl(teamA.countryCode, '84x64')} alt={teamA.name} style={{ width: 64, height: 48, borderRadius: 6, objectFit: 'cover', border: '2px solid var(--border-subtle)' }} />
+              <CountryFlag countryCode={teamA.countryCode} size="xl" style={{ borderRadius: 6, border: '2px solid var(--border-subtle)' }} />
               <div>
                 <div style={{ fontSize: 24, fontWeight: 700, color: 'white' }}>{teamA.name}</div>
                 <div style={{ fontSize: 13, color: 'var(--brand-red)' }}>FIFA Rank: #{teamA.fifaRanking || 'N/A'}</div>
@@ -134,7 +131,7 @@ export default function Compare() {
                 <div style={{ fontSize: 24, fontWeight: 700, color: 'white' }}>{teamB.name}</div>
                 <div style={{ fontSize: 13, color: 'var(--info-blue)' }}>FIFA Rank: #{teamB.fifaRanking || 'N/A'}</div>
               </div>
-              <img src={flagUrl(teamB.countryCode, '84x64')} alt={teamB.name} style={{ width: 64, height: 48, borderRadius: 6, objectFit: 'cover', border: '2px solid var(--border-subtle)' }} />
+              <CountryFlag countryCode={teamB.countryCode} size="xl" style={{ borderRadius: 6, border: '2px solid var(--border-subtle)' }} />
             </div>
           )}
         </div>

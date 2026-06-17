@@ -75,7 +75,7 @@ export default function Prizes() {
                 <XAxis type="number" stroke="var(--text-muted)" tickFormatter={formatMoney} />
                 <YAxis dataKey="stage" type="category" stroke="var(--text-muted)" />
                 <Tooltip cursor={{ fill: 'rgba(255,255,255,0.05)' }} contentStyle={{ background: 'var(--surface-elevated)', border: 'none', borderRadius: 8 }} formatter={(v: any) => `$${(Number(v)/1000000).toFixed(1)}M`} />
-                <Bar dataKey="perTeam" fill="var(--brand-gold)" radius={[0, 4, 4, 0]} />
+                <Bar dataKey="prizeUSD" fill="var(--brand-gold)" radius={[0, 4, 4, 0]} />
               </BarChart>
             </ResponsiveContainer>
           </div>
@@ -94,7 +94,7 @@ export default function Prizes() {
                 <XAxis dataKey="year" stroke="var(--text-muted)" />
                 <YAxis stroke="var(--text-muted)" tickFormatter={formatMoney} />
                 <Tooltip contentStyle={{ background: 'var(--surface-elevated)', border: 'none', borderRadius: 8 }} formatter={(v: any) => `$${(Number(v)/1000000).toFixed(0)}M`} />
-                <Line type="monotone" dataKey="pool" stroke="#3B82F6" strokeWidth={3} dot={{ r: 6, fill: '#3B82F6', strokeWidth: 2, stroke: 'var(--surface-card)' }} />
+                <Line type="monotone" dataKey="amount" stroke="#3B82F6" strokeWidth={3} dot={{ r: 6, fill: '#3B82F6', strokeWidth: 2, stroke: 'var(--surface-card)' }} />
               </LineChart>
             </ResponsiveContainer>
           </div>

@@ -12,7 +12,13 @@ const sizes = {
 };
 
 export default function CountryFlag({ countryCode, size = 'md', style }: CountryFlagProps) {
-  const code = countryCode.toLowerCase().replace('gb-eng', 'gb').replace('gb', 'gb');
+  let code = countryCode.toLowerCase();
+  // Ensure we don't accidentally break England/Scotland codes
+  if (code === 'eng' || code === 'gb-eng') code = 'gb-eng';
+  else if (code === 'sct' || code === 'gb-sct') code = 'gb-sct';
+  else if (code === 'wls' || code === 'gb-wls') code = 'gb-wls';
+  else if (code.startsWith('gb-') && code !== 'gb-eng' && code !== 'gb-sct' && code !== 'gb-wls') code = 'gb';
+
   const { w, h } = sizes[size];
   return (
     <img

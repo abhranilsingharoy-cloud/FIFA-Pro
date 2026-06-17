@@ -55,18 +55,26 @@ export const fetchMatches = async (): Promise<Match[]> => {
           });
         }
 
+        const hName = homeComp?.team?.name || 'TBA';
+        const hAbbr = homeComp?.team?.abbreviation || 'TBA';
+        const homeTeamObj = TEAMS.find(t => t.name.toLowerCase() === hName.toLowerCase() || t.countryCode.toLowerCase() === hAbbr.toLowerCase());
+
+        const aName = awayComp?.team?.name || 'TBA';
+        const aAbbr = awayComp?.team?.abbreviation || 'TBA';
+        const awayTeamObj = TEAMS.find(t => t.name.toLowerCase() === aName.toLowerCase() || t.countryCode.toLowerCase() === aAbbr.toLowerCase());
+
         return {
           id: String(ev.id),
           stage: parseStage(ev.season?.slug),
           groupId: ev.season?.slug?.includes('group') ? 'A' : undefined, // Simplify group ID
           matchNumber: index + 1,
           homeTeam: {
-            countryCode: homeComp?.team?.abbreviation || 'TBA',
-            name: homeComp?.team?.name || 'TBA',
+            countryCode: homeTeamObj ? homeTeamObj.countryCode : hAbbr,
+            name: homeTeamObj ? homeTeamObj.name : hName,
           },
           awayTeam: {
-            countryCode: awayComp?.team?.abbreviation || 'TBA',
-            name: awayComp?.team?.name || 'TBA',
+            countryCode: awayTeamObj ? awayTeamObj.countryCode : aAbbr,
+            name: awayTeamObj ? awayTeamObj.name : aName,
           },
           stadiumId: ev.competitions[0].venue?.displayName || 'Unknown Stadium',
           kickoffUtc: ev.date,
