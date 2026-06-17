@@ -143,10 +143,10 @@ export default function Dashboard() {
   const [liveMinute, setLiveMinute] = useState(67);
   const tickRef = useRef<ReturnType<typeof setInterval> | null>(null);
 
-  const liveMatch = matches.find(m => m.status === 'live') ?? matches[0] ?? null;
   const completedMatches = matches.filter(m => m.status === 'completed');
-  const todayMatches = matches.slice(0, 4);
   const recentResults = [...completedMatches].reverse();
+  const todayMatches = matches.slice(0, 4);
+  const liveMatch = matches.find(m => m.status === 'live') ?? recentResults[0] ?? matches[0] ?? null;
 
   // Simulate live minute advancing
   useEffect(() => {
