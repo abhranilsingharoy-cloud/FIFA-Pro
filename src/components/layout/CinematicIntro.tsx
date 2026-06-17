@@ -43,14 +43,6 @@ export default function CinematicIntro({ onComplete }: { onComplete: () => void 
         }}
       />
 
-      <motion.img 
-        src="https://upload.wikimedia.org/wikipedia/en/5/53/2026_FIFA_World_Cup_logo.svg" 
-        initial={{ scale: 0.8, opacity: 0, y: 50, filter: 'blur(10px)' }}
-        animate={{ scale: 1.1, opacity: 1, y: 0, filter: 'blur(0px)' }}
-        transition={{ duration: 1.5, ease: [0.16, 1, 0.3, 1] }}
-        style={{ width: 140, marginBottom: 50, zIndex: 2 }}
-      />
-      
       <motion.div
         initial={{ opacity: 0, y: 20, letterSpacing: '0.0em' }}
         animate={{ opacity: 1, y: 0, letterSpacing: '0.15em' }}
