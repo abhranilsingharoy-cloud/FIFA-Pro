@@ -8,13 +8,13 @@ export default function Stats() {
 
   const topScorers = useMemo(() => {
     return apiTopScorers.slice(0, 10).map(p => ({
-      name: p.name, goals: p.tournamentStats.goals,
+      name: p.name, goals: p.tournamentStats.goals, countryCode: p.countryCode
     }));
   }, [apiTopScorers]);
 
   const topAssisters = useMemo(() => {
     return apiTopAssisters.slice(0, 10).map(p => ({
-      name: p.name, assists: p.tournamentStats.assists,
+      name: p.name, assists: p.tournamentStats.assists, countryCode: p.countryCode
     }));
   }, [apiTopAssisters]);
 
@@ -115,7 +115,17 @@ export default function Stats() {
               <BarChart data={topScorers} layout="vertical" margin={{ left: 40 }}>
                 <CartesianGrid strokeDasharray="3 3" stroke="rgba(255,255,255,0.05)" horizontal={true} vertical={false} />
                 <XAxis type="number" stroke="var(--text-muted)" tick={{ fill: 'var(--text-muted)' }} />
-                <YAxis dataKey="name" type="category" stroke="var(--text-muted)" tick={{ fill: 'var(--text-muted)', fontSize: 12 }} />
+                <YAxis dataKey="name" type="category" width={150} tick={(props: any) => {
+                  const { x, y, payload } = props;
+                  const entry = topScorers.find(d => d.name === payload.value);
+                  const code = entry?.countryCode?.toLowerCase() || 'xx';
+                  return (
+                    <g transform={`translate(${x},${y})`}>
+                      <image x={-140} y={-6} width={16} height={12} href={`https://flagcdn.com/w20/${code}.png`} />
+                      <text x={-116} y={4} fill="var(--text-muted)" fontSize={12} textAnchor="start">{payload.value}</text>
+                    </g>
+                  );
+                }} />
                 <Tooltip cursor={{ fill: 'rgba(255,255,255,0.05)' }} contentStyle={{ background: 'var(--surface-elevated)', border: 'none', borderRadius: 8 }} />
                 <Bar dataKey="goals" fill="var(--brand-gold)" radius={[0, 4, 4, 0]} barSize={16} />
               </BarChart>
@@ -132,7 +142,17 @@ export default function Stats() {
               <BarChart data={topAssisters} layout="vertical" margin={{ left: 40 }}>
                 <CartesianGrid strokeDasharray="3 3" stroke="rgba(255,255,255,0.05)" horizontal={true} vertical={false} />
                 <XAxis type="number" stroke="var(--text-muted)" tick={{ fill: 'var(--text-muted)' }} />
-                <YAxis dataKey="name" type="category" stroke="var(--text-muted)" tick={{ fill: 'var(--text-muted)', fontSize: 12 }} />
+                <YAxis dataKey="name" type="category" width={150} tick={(props: any) => {
+                  const { x, y, payload } = props;
+                  const entry = topAssisters.find(d => d.name === payload.value);
+                  const code = entry?.countryCode?.toLowerCase() || 'xx';
+                  return (
+                    <g transform={`translate(${x},${y})`}>
+                      <image x={-140} y={-6} width={16} height={12} href={`https://flagcdn.com/w20/${code}.png`} />
+                      <text x={-116} y={4} fill="var(--text-muted)" fontSize={12} textAnchor="start">{payload.value}</text>
+                    </g>
+                  );
+                }} />
                 <Tooltip cursor={{ fill: 'rgba(255,255,255,0.05)' }} contentStyle={{ background: 'var(--surface-elevated)', border: 'none', borderRadius: 8 }} />
                 <Bar dataKey="assists" fill="#3B82F6" radius={[0, 4, 4, 0]} barSize={16} />
               </BarChart>
