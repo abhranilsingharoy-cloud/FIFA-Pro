@@ -4,19 +4,19 @@ import { BarChart, Bar, AreaChart, Area, XAxis, YAxis, CartesianGrid, Tooltip, R
 import { useMemo } from 'react';
 
 export default function Stats() {
-  const { matches, players, teams } = useTournamentStore();
+  const { matches, teams, topScorers: apiTopScorers, topAssisters: apiTopAssisters } = useTournamentStore();
 
   const topScorers = useMemo(() => {
-    return [...players].sort((a, b) => b.tournamentStats.goals - a.tournamentStats.goals).slice(0, 10).map(p => ({
+    return apiTopScorers.slice(0, 10).map(p => ({
       name: p.name, goals: p.tournamentStats.goals,
     }));
-  }, [players]);
+  }, [apiTopScorers]);
 
   const topAssisters = useMemo(() => {
-    return [...players].sort((a, b) => b.tournamentStats.assists - a.tournamentStats.assists).slice(0, 10).map(p => ({
+    return apiTopAssisters.slice(0, 10).map(p => ({
       name: p.name, assists: p.tournamentStats.assists,
     }));
-  }, [players]);
+  }, [apiTopAssisters]);
 
   const goalsByMinute = useMemo(() => {
     const minCounts = new Array(90).fill(0);

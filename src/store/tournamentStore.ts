@@ -7,6 +7,7 @@ interface TournamentState {
   matches: Match[];
   players: Player[];
   topScorers: Player[];
+  topAssisters: Player[];
   teams: Team[];
   liveMatches: Match[];
   selectedTimezone: string;
@@ -29,6 +30,7 @@ export const useTournamentStore = create<TournamentState>((set, get) => ({
   matches: [],
   players: [],
   topScorers: [],
+  topAssisters: [],
   teams: [],
   liveMatches: [],
   selectedTimezone: Intl.DateTimeFormat().resolvedOptions().timeZone,
@@ -60,7 +62,7 @@ export const useTournamentStore = create<TournamentState>((set, get) => ({
   fetchData: async (backgroundRefresh = false) => {
     if (!backgroundRefresh) set({ isLoading: true, error: null });
     try {
-      const [matches, teams, players, topScorers] = await Promise.all([
+      const [matches, teams, players, topStats] = await Promise.all([
         fetchMatches(),
         fetchTeams(),
         fetchPlayers(),
@@ -70,7 +72,8 @@ export const useTournamentStore = create<TournamentState>((set, get) => ({
         matches,
         teams,
         players,
-        topScorers,
+        topScorers: topStats.scorers,
+        topAssisters: topStats.assisters,
         liveMatches: matches.filter(m => m.status === 'live'),
         isLoading: false
       });

@@ -132,15 +132,19 @@ export const fetchPlayers = async (): Promise<Player[]> => {
   return Promise.resolve(PLAYERS);
 };
 
-export const fetchTopScorers = async (): Promise<Player[]> => {
+export const fetchTopScorers = async (): Promise<{ scorers: Player[], assisters: Player[] }> => {
+  let scorers: Player[] = [];
+  let assisters: Player[] = [];
   try {
     const response = await axios.get(`${ESPN_API_BASE}/statistics`);
     const goalsLeaders = response.data?.stats?.find((s: any) => s.name === 'goalsLeaders');
+    const assistsLeaders = response.data?.stats?.find((s: any) => s.name === 'assistsLeaders');
+
     if (goalsLeaders?.leaders?.length > 0) {
-      return goalsLeaders.leaders.map((leader: any, index: number) => {
+      scorers = goalsLeaders.leaders.map((leader: any, index: number) => {
         const ath = leader.athlete;
         return {
-          id: ath.id || `dyn_${index}`,
+          id: ath.id || `g_${index}`,
           name: ath.displayName || ath.shortName,
           countryCode: ath.team?.abbreviation || 'XX',
           clubName: 'National Team', 
@@ -156,9 +160,30 @@ export const fetchTopScorers = async (): Promise<Player[]> => {
         };
       });
     }
+
+    if (assistsLeaders?.leaders?.length > 0) {
+      assisters = assistsLeaders.leaders.map((leader: any, index: number) => {
+        const ath = leader.athlete;
+        return {
+          id: ath.id || `a_${index}`,
+          name: ath.displayName || ath.shortName,
+          countryCode: ath.team?.abbreviation || 'XX',
+          clubName: 'National Team', 
+          dateOfBirth: '2000-01-01',
+          position: 'Midfielder' as any,
+          jerseyNumber: parseInt(ath.jersey || '10', 10) || 10,
+          isLegend: false,
+          tournamentStats: {
+            goals: 0,
+            assists: parseInt(leader.value || '0', 10),
+            avgRating: 0
+          } as any
+        };
+      });
+    }
   } catch (error) {
     console.error('Error fetching top scorers from ESPN:', error);
   }
-  return [];
+  return { scorers, assisters };
 };
 
