@@ -138,7 +138,7 @@ const PROGRESS_STEPS = [
 
 // ─── Main Component ──────────────────────────────────────────────────────────
 export default function Dashboard() {
-  const { matches, players } = useTournamentStore();
+  const { matches, players, topScorers } = useTournamentStore();
   const [activeTab, setActiveTab] = useState<'goals' | 'assists' | 'rating'>('goals');
   const [liveMinute, setLiveMinute] = useState(67);
   const tickRef = useRef<ReturnType<typeof setInterval> | null>(null);
@@ -177,21 +177,9 @@ export default function Dashboard() {
     }
   });
 
-  const realTopScorers = Object.values(playerMap).sort((a, b) => b.goals - a.goals).slice(0, 5).map((p, i) => ({
-    id: `dyn_${i}`,
-    name: p.name,
-    countryCode: p.countryCode,
-    clubName: p.clubName,
-    dateOfBirth: '2000-01-01',
-    position: 'Forward' as any,
-    jerseyNumber: 9,
-    tournamentStats: { goals: p.goals, assists: 0, avgRating: 0 } as any,
-    isLegend: false
-  }));
-
-  const sortedByGoals = realTopScorers.length > 0 ? realTopScorers : [...players].sort((a, b) => b.tournamentStats.goals - a.tournamentStats.goals).slice(0, 5);
-  const sortedByAssists = [...players].sort((a, b) => b.tournamentStats.assists - a.tournamentStats.assists).slice(0, 5);
-  const sortedByRating = [...players].sort((a, b) => b.tournamentStats.avgRating - a.tournamentStats.avgRating).slice(0, 5);
+  const sortedByGoals = topScorers?.length > 0 ? topScorers.slice(0, 20) : [...players].sort((a, b) => b.tournamentStats.goals - a.tournamentStats.goals).slice(0, 20);
+  const sortedByAssists = [...players].sort((a, b) => b.tournamentStats.assists - a.tournamentStats.assists).slice(0, 20);
+  const sortedByRating = [...players].sort((a, b) => b.tournamentStats.avgRating - a.tournamentStats.avgRating).slice(0, 20);
 
   const leaderboardData = activeTab === 'goals' ? sortedByGoals
     : activeTab === 'assists' ? sortedByAssists

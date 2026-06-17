@@ -68,15 +68,26 @@ function GroupTable({ groupLetter }: { groupLetter: string }) {
                   <td style={{ fontWeight: 800, color: 'white', fontSize: 16 }}>{team.points}</td>
                   <td>
                     <div style={{ display: 'flex', gap: 4 }}>
-                      {['W', 'D', 'W'].map((f, i) => (
-                        <span key={i} style={{
-                          width: 20, height: 20, borderRadius: '50%', display: 'inline-flex', alignItems: 'center', justifyContent: 'center',
-                          fontSize: 10, fontWeight: 700, color: 'white',
-                          background: f === 'W' ? 'var(--success-green)' : f === 'D' ? 'var(--warning-amber)' : 'var(--live-red)'
-                        }}>
-                          {f}
-                        </span>
-                      ))}
+                      {(() => {
+                        const form = [];
+                        for (let i = 0; i < team.wins; i++) form.push('W');
+                        for (let i = 0; i < team.draws; i++) form.push('D');
+                        for (let i = 0; i < team.losses; i++) form.push('L');
+                        // Fill remaining with '-' up to 5 if needed, though World Cup is up to 7 games, but we show last 5
+                        const displayForm = form.slice(-5).reverse();
+                        if (displayForm.length === 0) {
+                           return <span style={{ color: 'var(--text-muted)', fontSize: 12 }}>No Data</span>;
+                        }
+                        return displayForm.map((f, i) => (
+                          <span key={i} style={{
+                            width: 20, height: 20, borderRadius: '50%', display: 'inline-flex', alignItems: 'center', justifyContent: 'center',
+                            fontSize: 10, fontWeight: 700, color: 'white',
+                            background: f === 'W' ? 'var(--success-green)' : f === 'D' ? 'var(--warning-amber)' : 'var(--live-red)'
+                          }}>
+                            {f}
+                          </span>
+                        ));
+                      })()}
                     </div>
                   </td>
                 </tr>

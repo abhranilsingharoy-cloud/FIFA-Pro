@@ -1,5 +1,5 @@
 import { useTournamentStore } from '../store/tournamentStore';
-import { useState, useMemo } from 'react';
+import { useState, useMemo, useEffect } from 'react';
 import { useParams, useNavigate } from 'react-router-dom';
 import { motion, AnimatePresence } from 'framer-motion';
 import {
@@ -112,9 +112,48 @@ export default function TeamDetail() {
   const [sortDir, setSortDir] = useState<'asc' | 'desc'>('asc');
   const [statsTab, setStatsTab] = useState<'attacking' | 'defending' | 'possession' | 'disciplinary'>('attacking');
 
-  const team = useMemo(() => {
+  const baseTeam = useMemo(() => {
     return teams.find(t => t.countryCode.toLowerCase() === (countryCode ?? '').toLowerCase());
   }, [countryCode]);
+
+  const [liveRecord, setLiveRecord] = useState<{w: number, d: number, l: number} | null>(null);
+  const [liveNextEvent, setLiveNextEvent] = useState<any>(null);
+
+  useEffect(() => {
+    if (baseTeam?.espnId) {
+      fetch(`https://site.api.espn.com/apis/site/v2/sports/soccer/fifa.world/teams/${baseTeam.espnId}`)
+        .then(res => res.json())
+        .then(data => {
+          if (data.team?.record?.items?.[0]?.summary) {
+            const parts = data.team.record.items[0].summary.split('-');
+            if (parts.length === 3) {
+              setLiveRecord({ w: parseInt(parts[0], 10), d: parseInt(parts[1], 10), l: parseInt(parts[2], 10) });
+            }
+          }
+          if (data.team?.nextEvent?.[0]) {
+            setLiveNextEvent(data.team.nextEvent[0]);
+          }
+        })
+        .catch(console.error);
+    }
+  }, [baseTeam?.espnId]);
+
+  const team = useMemo(() => {
+    if (!baseTeam) return null;
+    if (liveRecord) {
+      const displayPoints = (liveRecord.w * 3) + liveRecord.d;
+      const displayMatches = liveRecord.w + liveRecord.d + liveRecord.l || baseTeam.matchesPlayed || 0;
+      return {
+        ...baseTeam,
+        wins: liveRecord.w,
+        draws: liveRecord.d,
+        losses: liveRecord.l,
+        points: displayPoints,
+        matchesPlayed: displayMatches,
+      };
+    }
+    return baseTeam;
+  }, [baseTeam, liveRecord]);
 
   const squad = useMemo(() => team ? generateSquad(team) : [], [team]);
 

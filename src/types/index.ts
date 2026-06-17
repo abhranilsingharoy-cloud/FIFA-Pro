@@ -130,6 +130,7 @@ export interface Stadium {
 }
 
 export interface Team {
+  espnId?: string;
   countryCode: string;
   name: string;
   flag: string;

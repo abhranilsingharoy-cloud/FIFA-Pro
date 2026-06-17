@@ -171,6 +171,14 @@ export default function AppShell({ children }: { children: React.ReactNode }) {
         </AnimatePresence>
       </main>
 
+      <footer style={{
+        padding: '24px 16px', textAlign: 'center', color: 'var(--text-muted)', fontSize: 14,
+        borderTop: '1px solid var(--border-subtle)', background: 'rgba(10,15,30,0.5)',
+        paddingBottom: 'max(24px, calc(80px + env(safe-area-inset-bottom)))'
+      }}>
+        Designed and Developed by <span style={{ color: 'var(--brand-gold)', fontWeight: 600, letterSpacing: '0.05em' }}>Abhranil Singha Roy</span>
+      </footer>
+
       {/* ─── MOBILE BOTTOM TAB BAR ─────────── */}
       <nav className="hide-desktop" style={{
         position: 'fixed', bottom: 0, left: 0, right: 0, zIndex: 99,

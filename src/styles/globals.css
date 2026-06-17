@@ -154,6 +154,7 @@ body {
 .input::placeholder { color: var(--text-muted); }
 
 select.input { cursor: pointer; }
+option { background: var(--surface-elevated); color: var(--text-primary); }
 
 /* ─── ANIMATIONS ─────────────────────────────── */
 @keyframes pulse-live {

@@ -88,7 +88,7 @@ export default function Compare() {
             onChange={(e) => setTeamAId(e.target.value)}
             style={{ 
               width: '100%', padding: '12px 16px', borderRadius: 8, 
-              background: 'var(--bg-default)', color: 'white', border: '1px solid var(--border-subtle)',
+              background: 'var(--surface-dark)', color: 'white', border: '1px solid var(--border-subtle)',
               fontSize: 16, outline: 'none'
             }}
           >
@@ -122,7 +122,7 @@ export default function Compare() {
             onChange={(e) => setTeamBId(e.target.value)}
             style={{ 
               width: '100%', padding: '12px 16px', borderRadius: 8, 
-              background: 'var(--bg-default)', color: 'white', border: '1px solid var(--border-subtle)',
+              background: 'var(--surface-dark)', color: 'white', border: '1px solid var(--border-subtle)',
               fontSize: 16, outline: 'none', textAlign: 'right'
             }}
           >

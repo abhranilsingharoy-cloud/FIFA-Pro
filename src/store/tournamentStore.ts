@@ -1,10 +1,11 @@
 import { create } from 'zustand';
 import type { Match, Player, Team } from '../types';
-import { fetchMatches, fetchTeams, fetchPlayers } from '../services/api';
+import { fetchMatches, fetchTeams, fetchPlayers, fetchTopScorers } from '../services/api';
 
 interface TournamentState {
   matches: Match[];
   players: Player[];
+  topScorers: Player[];
   teams: Team[];
   liveMatches: Match[];
   selectedTimezone: string;
@@ -26,6 +27,7 @@ interface TournamentState {
 export const useTournamentStore = create<TournamentState>((set, get) => ({
   matches: [],
   players: [],
+  topScorers: [],
   teams: [],
   liveMatches: [],
   selectedTimezone: Intl.DateTimeFormat().resolvedOptions().timeZone,
@@ -57,15 +59,17 @@ export const useTournamentStore = create<TournamentState>((set, get) => ({
   fetchData: async (backgroundRefresh = false) => {
     if (!backgroundRefresh) set({ isLoading: true, error: null });
     try {
-      const [matches, teams, players] = await Promise.all([
+      const [matches, teams, players, topScorers] = await Promise.all([
         fetchMatches(),
         fetchTeams(),
-        fetchPlayers()
+        fetchPlayers(),
+        fetchTopScorers()
       ]);
       set({
         matches,
         teams,
         players,
+        topScorers,
         liveMatches: matches.filter(m => m.status === 'live'),
         isLoading: false
       });

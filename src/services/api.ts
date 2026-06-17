@@ -90,24 +90,26 @@ export const fetchTeams = async (): Promise<Team[]> => {
   try {
     const response = await axios.get(`${ESPN_API_BASE}/teams?limit=100`);
     if (response.data?.sports?.[0]?.leagues?.[0]?.teams?.length > 0) {
-      return response.data.sports[0].leagues[0].teams.map((t: any) => {
-        const teamData = t.team;
-        return {
-          countryCode: teamData.abbreviation || 'XX',
-          name: teamData.displayName || teamData.name,
-          flag: teamData.logos?.[0]?.href || '',
-          confederation: 'FIFA',
-          fifaRanking: 0,
-          groupId: 'A',
-          manager: 'Unknown',
-          managerNationality: 'Unknown',
-          squadSize: 26,
-          avgAge: 26.5,
-          keyPlayerId: '',
-          wins: 0, draws: 0, losses: 0, goalsFor: 0, goalsAgainst: 0, points: 0, matchesPlayed: 0,
-          primaryColor: `#${teamData.color || '000000'}`,
-          secondaryColor: `#${teamData.alternateColor || 'ffffff'}`,
-        };
+      const espnTeams = response.data.sports[0].leagues[0].teams;
+      return TEAMS.map(mockTeam => {
+        // Try to match by countryCode (abbreviation) first, then fallback to name
+        const liveTeam = espnTeams.find((et: any) => 
+          et.team.abbreviation?.toLowerCase() === mockTeam.countryCode.toLowerCase() ||
+          et.team.displayName?.toLowerCase() === mockTeam.name.toLowerCase()
+        );
+        
+        if (liveTeam) {
+          const td = liveTeam.team;
+          return {
+            ...mockTeam,
+            name: td.displayName || td.name,
+            espnId: td.id,
+            flag: td.logos?.[0]?.href || mockTeam.flag,
+            primaryColor: td.color ? `#${td.color}` : mockTeam.primaryColor,
+            secondaryColor: td.alternateColor ? `#${td.alternateColor}` : mockTeam.secondaryColor,
+          };
+        }
+        return mockTeam;
       });
     }
   } catch (error) {
@@ -120,5 +122,35 @@ export const fetchPlayers = async (): Promise<Player[]> => {
   // ESPN doesn't provide a flat list of all tournament players easily.
   // We'll fall back to our highly realistic mock data for players.
   return Promise.resolve(PLAYERS);
+};
+
+export const fetchTopScorers = async (): Promise<Player[]> => {
+  try {
+    const response = await axios.get(`${ESPN_API_BASE}/statistics`);
+    const goalsLeaders = response.data?.stats?.find((s: any) => s.name === 'goalsLeaders');
+    if (goalsLeaders?.leaders?.length > 0) {
+      return goalsLeaders.leaders.map((leader: any, index: number) => {
+        const ath = leader.athlete;
+        return {
+          id: ath.id || `dyn_${index}`,
+          name: ath.displayName || ath.shortName,
+          countryCode: ath.team?.abbreviation || 'XX',
+          clubName: 'National Team', 
+          dateOfBirth: '2000-01-01',
+          position: 'Forward' as any,
+          jerseyNumber: parseInt(ath.jersey || '9', 10) || 9,
+          isLegend: false,
+          tournamentStats: {
+            goals: parseInt(leader.value || '0', 10),
+            assists: 0,
+            avgRating: 0
+          } as any
+        };
+      });
+    }
+  } catch (error) {
+    console.error('Error fetching top scorers from ESPN:', error);
+  }
+  return [];
 };
 
