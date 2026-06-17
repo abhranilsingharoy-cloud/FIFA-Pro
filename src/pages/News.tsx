@@ -22,7 +22,7 @@ export default function News() {
         const data = await res.json();
         
         if (data.items) {
-          const formattedNews = data.items.slice(0, 15).map((item: any) => ({
+          const formattedNews = data.items.map((item: any) => ({
             title: item.title.split(' - ')[0], // Google News appends the source with ' - '
             link: item.link,
             pubDate: new Date(item.pubDate).toLocaleDateString(undefined, { month: 'short', day: 'numeric', hour: '2-digit', minute: '2-digit' }),

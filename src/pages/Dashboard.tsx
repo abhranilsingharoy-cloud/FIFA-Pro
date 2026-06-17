@@ -146,7 +146,7 @@ export default function Dashboard() {
   const liveMatch = matches.find(m => m.status === 'live') ?? matches[0] ?? null;
   const completedMatches = matches.filter(m => m.status === 'completed');
   const todayMatches = matches.slice(0, 4);
-  const recentResults = completedMatches.slice(-5).reverse();
+  const recentResults = [...completedMatches].reverse();
 
   // Simulate live minute advancing
   useEffect(() => {
@@ -788,7 +788,7 @@ export default function Dashboard() {
       >
         <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', marginBottom: 16 }}>
           <h2 className="section-title"><Users size={18} style={{ color: 'var(--brand-red)', marginRight: 4 }} />Recent Results</h2>
-          <span style={{ fontSize: 12, color: 'var(--text-muted)' }}>Last {recentResults.length} matches</span>
+          <span style={{ fontSize: 12, color: 'var(--text-muted)' }}>All {recentResults.length} completed matches</span>
         </div>
 
         <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fill, minmax(280px, 1fr))', gap: 12 }}>
