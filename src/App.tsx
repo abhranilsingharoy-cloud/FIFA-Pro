@@ -2,8 +2,9 @@ import { BrowserRouter, Routes, Route } from 'react-router-dom';
 import AppShell from './components/layout/AppShell';
 import WorldCupScene3D from './components/3d/WorldCupScene3D';
 import './styles/globals.css';
-import { lazy, Suspense, useEffect, Component } from 'react';
+import { lazy, Suspense, useEffect, useState, Component } from 'react';
 import type { ReactNode } from 'react';
+import CinematicIntro from './components/layout/CinematicIntro';
 import { useTournamentStore } from './store/tournamentStore';
 
 class ErrorBoundary extends Component<{children: ReactNode}, {hasError: boolean, error: Error | null}> {
@@ -69,6 +70,7 @@ function GlobalLoader() {
 }
 
 function AppContent() {
+  const [showIntro, setShowIntro] = useState(true);
   const performanceMode = useTournamentStore(s => s.performanceMode);
   const isLoading = useTournamentStore(s => s.isLoading);
   const fetchData = useTournamentStore(s => s.fetchData);
@@ -85,6 +87,7 @@ function AppContent() {
 
   return (
     <ErrorBoundary>
+      {showIntro && <CinematicIntro onComplete={() => setShowIntro(false)} />}
       {!performanceMode && <WorldCupScene3D variant="dashboard" />}
       <BrowserRouter>
         <AppShell>
