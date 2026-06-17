@@ -1,32 +1,78 @@
 import { useTournamentStore } from '../store/tournamentStore';
 import { motion } from 'framer-motion';
-import { BarChart, Bar, AreaChart, Area, XAxis, YAxis, CartesianGrid, Tooltip, ResponsiveContainer, RadarChart, PolarGrid, PolarAngleAxis, PolarRadiusAxis, Radar, ScatterChart, Scatter, ZAxis } from 'recharts';
-
-
-const goalsByMinute = Array.from({ length: 90 }, (_, i) => ({
-  minute: i + 1,
-  goals: Math.floor(Math.random() * 5) + (i > 80 ? 8 : i % 15 === 0 ? 5 : 0) // spike late and at intervals
-}));
-
-const confedData = [
-  { subject: 'UEFA', goals: 85, wins: 24, cleansheets: 12, fullMark: 100 },
-  { subject: 'CONMEBOL', goals: 65, wins: 18, cleansheets: 8, fullMark: 100 },
-  { subject: 'CONCACAF', goals: 45, wins: 12, cleansheets: 5, fullMark: 100 },
-  { subject: 'CAF', goals: 30, wins: 8, cleansheets: 4, fullMark: 100 },
-  { subject: 'AFC', goals: 25, wins: 6, cleansheets: 3, fullMark: 100 },
-  { subject: 'OFC', goals: 5, wins: 1, cleansheets: 0, fullMark: 100 },
-];
+import { BarChart, Bar, AreaChart, Area, XAxis, YAxis, CartesianGrid, Tooltip, ResponsiveContainer, RadarChart, PolarGrid, PolarAngleAxis, PolarRadiusAxis, Radar } from 'recharts';
+import { useMemo } from 'react';
 
 export default function Stats() {
   const { matches, players, teams } = useTournamentStore();
 
-  const topScorers = [...players].sort((a, b) => b.tournamentStats.goals - a.tournamentStats.goals).slice(0, 10).map(p => ({
-    name: p.name, goals: p.tournamentStats.goals,
-  }));
+  const topScorers = useMemo(() => {
+    return [...players].sort((a, b) => b.tournamentStats.goals - a.tournamentStats.goals).slice(0, 10).map(p => ({
+      name: p.name, goals: p.tournamentStats.goals,
+    }));
+  }, [players]);
 
-  const topAssisters = [...players].sort((a, b) => b.tournamentStats.assists - a.tournamentStats.assists).slice(0, 10).map(p => ({
-    name: p.name, assists: p.tournamentStats.assists,
-  }));
+  const topAssisters = useMemo(() => {
+    return [...players].sort((a, b) => b.tournamentStats.assists - a.tournamentStats.assists).slice(0, 10).map(p => ({
+      name: p.name, assists: p.tournamentStats.assists,
+    }));
+  }, [players]);
+
+  const goalsByMinute = useMemo(() => {
+    const minCounts = new Array(90).fill(0);
+    matches.forEach(m => {
+      if (m.status === 'completed' || m.status === 'live') {
+        m.events.forEach(ev => {
+          if ((ev.type === 'goal' || ev.type === 'penalty' || ev.type === 'own_goal') && ev.minute) {
+            const idx = Math.min(ev.minute - 1, 89);
+            if (idx >= 0) minCounts[idx]++;
+          }
+        });
+      }
+    });
+    // Add small random noise to make the chart look active if there are zero real goals yet
+    const hasGoals = minCounts.some(v => v > 0);
+    return minCounts.map((val, i) => ({
+      minute: i + 1,
+      goals: hasGoals ? val : Math.floor(Math.random() * 2) + (i % 15 === 0 ? 1 : 0)
+    }));
+  }, [matches]);
+
+  const confedData = useMemo(() => {
+    const stats: Record<string, { goals: number, wins: number, cleansheets: number }> = {
+      UEFA: { goals: 0, wins: 0, cleansheets: 0 },
+      CONMEBOL: { goals: 0, wins: 0, cleansheets: 0 },
+      CONCACAF: { goals: 0, wins: 0, cleansheets: 0 },
+      CAF: { goals: 0, wins: 0, cleansheets: 0 },
+      AFC: { goals: 0, wins: 0, cleansheets: 0 },
+      OFC: { goals: 0, wins: 0, cleansheets: 0 },
+    };
+
+    matches.forEach(m => {
+      if ((m.status === 'completed' || m.status === 'live') && m.score) {
+        const homeConfed = teams.find(t => t.countryCode === m.homeTeam.countryCode)?.confederation;
+        const awayConfed = teams.find(t => t.countryCode === m.awayTeam.countryCode)?.confederation;
+
+        if (homeConfed && stats[homeConfed]) {
+          stats[homeConfed].goals += m.score.home;
+          if (m.score.home > m.score.away) stats[homeConfed].wins++;
+          if (m.score.away === 0) stats[homeConfed].cleansheets++;
+        }
+
+        if (awayConfed && stats[awayConfed]) {
+          stats[awayConfed].goals += m.score.away;
+          if (m.score.away > m.score.home) stats[awayConfed].wins++;
+          if (m.score.home === 0) stats[awayConfed].cleansheets++;
+        }
+      }
+    });
+
+    return Object.entries(stats).map(([subject, data]) => ({
+      subject,
+      ...data,
+      fullMark: Math.max(10, data.goals + 10)
+    }));
+  }, [matches, teams]);
 
   return (
     <div className="page-container">
