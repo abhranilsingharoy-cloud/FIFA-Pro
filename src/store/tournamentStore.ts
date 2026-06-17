@@ -62,15 +62,42 @@ export const useTournamentStore = create<TournamentState>((set, get) => ({
   fetchData: async (backgroundRefresh = false) => {
     if (!backgroundRefresh) set({ isLoading: true, error: null });
     try {
-      const [matches, teams, players, topStats] = await Promise.all([
+      const [matches, rawTeams, players, topStats] = await Promise.all([
         fetchMatches(),
         fetchTeams(),
         fetchPlayers(),
         fetchTopScorers()
       ]);
+
+      // Dynamically calculate team standings from live matches
+      const liveTeams = rawTeams.map(t => ({ 
+        ...t, 
+        matchesPlayed: 0, wins: 0, draws: 0, losses: 0, 
+        goalsFor: 0, goalsAgainst: 0, points: 0 
+      }));
+      const teamMap = new Map(liveTeams.map(t => [t.countryCode, t]));
+
+      matches.forEach(m => {
+        if (m.status === 'completed' && m.score) {
+          const home = teamMap.get(m.homeTeam.countryCode);
+          const away = teamMap.get(m.awayTeam.countryCode);
+          if (home && away) {
+            home.matchesPlayed++;
+            away.matchesPlayed++;
+            home.goalsFor += m.score.home;
+            home.goalsAgainst += m.score.away;
+            away.goalsFor += m.score.away;
+            away.goalsAgainst += m.score.home;
+            if (m.score.home > m.score.away) { home.wins++; home.points += 3; away.losses++; }
+            else if (m.score.home < m.score.away) { away.wins++; away.points += 3; home.losses++; }
+            else { home.draws++; away.draws++; home.points++; away.points++; }
+          }
+        }
+      });
+
       set({
         matches,
-        teams,
+        teams: liveTeams,
         players,
         topScorers: topStats.scorers,
         topAssisters: topStats.assisters,
@@ -78,7 +105,7 @@ export const useTournamentStore = create<TournamentState>((set, get) => ({
         isLoading: false
       });
       // Fire and forget ML training in background
-      trainTournamentModel(teams, matches).catch(e => console.error("ML Training Error:", e));
+      trainTournamentModel(liveTeams, matches).catch(e => console.error("ML Training Error:", e));
     } catch (err: any) {
       if (!backgroundRefresh) set({ error: err.message || 'Failed to fetch data', isLoading: false });
     }
