@@ -138,14 +138,19 @@ const PROGRESS_STEPS = [
 
 // ─── Main Component ──────────────────────────────────────────────────────────
 export default function Dashboard() {
-  const { matches, players, topScorers } = useTournamentStore();
+  const { matches, players, topScorers, topAssisters } = useTournamentStore();
   const [activeTab, setActiveTab] = useState<'goals' | 'assists' | 'rating'>('goals');
   const [liveMinute, setLiveMinute] = useState(67);
   const tickRef = useRef<ReturnType<typeof setInterval> | null>(null);
 
   const completedMatches = matches.filter(m => m.status === 'completed');
   const recentResults = [...completedMatches].reverse();
-  const todayMatches = matches.slice(0, 4);
+  
+  // Get live and upcoming matches
+  const activeAndUpcoming = matches.filter(m => m.status === 'live' || m.status === 'scheduled')
+    .sort((a, b) => new Date(a.kickoffUtc).getTime() - new Date(b.kickoffUtc).getTime());
+  const todayMatches = activeAndUpcoming.slice(0, 4);
+  
   const liveMatch = matches.find(m => m.status === 'live') ?? recentResults[0] ?? matches[0] ?? null;
 
   // Simulate live minute advancing
@@ -178,8 +183,31 @@ export default function Dashboard() {
   });
 
   const sortedByGoals = topScorers?.length > 0 ? topScorers.slice(0, 20) : [...players].sort((a, b) => b.tournamentStats.goals - a.tournamentStats.goals).slice(0, 20);
-  const sortedByAssists = [...players].sort((a, b) => b.tournamentStats.assists - a.tournamentStats.assists).slice(0, 20);
-  const sortedByRating = [...players].sort((a, b) => b.tournamentStats.avgRating - a.tournamentStats.avgRating).slice(0, 20);
+  const sortedByAssists = topAssisters?.length > 0 ? topAssisters.slice(0, 20) : [...players].sort((a, b) => b.tournamentStats.assists - a.tournamentStats.assists).slice(0, 20);
+  
+  // Calculate dynamic live rating based on actual stats, fallback to mock if no real stats yet
+  const hasRealStats = topScorers?.length > 0 || topAssisters?.length > 0;
+  let sortedByRating;
+  if (hasRealStats) {
+    const playerStatsMap: Record<string, { name: string, countryCode: string, clubName: string, goals: number, assists: number }> = {};
+    topScorers.forEach(p => {
+      playerStatsMap[p.name] = { name: p.name, countryCode: p.countryCode, clubName: p.clubName, goals: p.tournamentStats.goals, assists: 0 };
+    });
+    topAssisters.forEach(p => {
+      if (playerStatsMap[p.name]) playerStatsMap[p.name].assists = p.tournamentStats.assists;
+      else playerStatsMap[p.name] = { name: p.name, countryCode: p.countryCode, clubName: p.clubName, goals: 0, assists: p.tournamentStats.assists };
+    });
+    sortedByRating = Object.values(playerStatsMap)
+      .map(p => ({
+        id: p.name, name: p.name, countryCode: p.countryCode, clubName: p.clubName,
+        dateOfBirth: '', position: 'Forward', jerseyNumber: 0, isLegend: false,
+        tournamentStats: { goals: p.goals, assists: p.assists, avgRating: 6.0 + (p.goals * 0.8) + (p.assists * 0.5) }
+      } as any))
+      .sort((a, b) => b.tournamentStats.avgRating - a.tournamentStats.avgRating)
+      .slice(0, 20);
+  } else {
+    sortedByRating = [...players].sort((a, b) => b.tournamentStats.avgRating - a.tournamentStats.avgRating).slice(0, 20);
+  }
 
   const leaderboardData = activeTab === 'goals' ? sortedByGoals
     : activeTab === 'assists' ? sortedByAssists
@@ -506,7 +534,7 @@ export default function Dashboard() {
           style={{ padding: '20px' }}
         >
           <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', marginBottom: 16 }}>
-            <h2 className="section-title">Today's Fixtures</h2>
+            <h2 className="section-title">Upcoming Fixtures</h2>
             <button className="btn-ghost" style={{ fontSize: 12, padding: '4px 10px' }}>View All <ChevronRight size={12} style={{ display: 'inline' }} /></button>
           </div>
           <div style={{ display: 'flex', flexDirection: 'column', gap: 10 }}>
@@ -563,24 +591,23 @@ export default function Dashboard() {
             ))}
           </div>
 
-          {/* Mini stats strip */}
           <div style={{
             marginTop: 16, padding: '12px 14px', borderRadius: 10,
             background: 'linear-gradient(135deg, rgba(255,215,0,0.06), rgba(200,16,46,0.06))',
             border: '1px solid var(--border-gold)', display: 'flex', justifyContent: 'space-around', textAlign: 'center'
           }}>
             <div>
-              <div style={{ fontFamily: 'JetBrains Mono, monospace', fontSize: 20, fontWeight: 700, color: 'var(--brand-gold)' }}>1</div>
+              <div style={{ fontFamily: 'JetBrains Mono, monospace', fontSize: 20, fontWeight: 700, color: 'var(--brand-gold)' }}>{matches.filter(m => m.status === 'live').length}</div>
               <div style={{ fontSize: 11, color: 'var(--text-muted)' }}>Live</div>
             </div>
             <div style={{ width: 1, background: 'var(--border-subtle)' }} />
             <div>
-              <div style={{ fontFamily: 'JetBrains Mono, monospace', fontSize: 20, fontWeight: 700, color: 'var(--success-green)' }}>5</div>
+              <div style={{ fontFamily: 'JetBrains Mono, monospace', fontSize: 20, fontWeight: 700, color: 'var(--success-green)' }}>{completedMatches.length}</div>
               <div style={{ fontSize: 11, color: 'var(--text-muted)' }}>Completed</div>
             </div>
             <div style={{ width: 1, background: 'var(--border-subtle)' }} />
             <div>
-              <div style={{ fontFamily: 'JetBrains Mono, monospace', fontSize: 20, fontWeight: 700, color: 'var(--info-blue)' }}>8</div>
+              <div style={{ fontFamily: 'JetBrains Mono, monospace', fontSize: 20, fontWeight: 700, color: 'var(--info-blue)' }}>{matches.filter(m => m.status === 'scheduled').length}</div>
               <div style={{ fontSize: 11, color: 'var(--text-muted)' }}>Upcoming</div>
             </div>
           </div>
