@@ -53,7 +53,7 @@ export default function CinematicIntro({ onComplete }: { onComplete: () => void 
           textShadow: '0 10px 30px rgba(0,0,0,0.8)'
         }}
       >
-        <span style={{ color: 'var(--brand-gold)' }}>FIFA</span> WORLD CUP
+        <span style={{ color: 'var(--brand-gold)' }}>FIFA</span> WORLD CUP 2026
       </motion.div>
 
       <motion.div
