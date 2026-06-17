@@ -48,28 +48,59 @@ This application bypasses generic UI libraries in favor of a **custom glassmorph
 
 ## 🏗 Architecture & Folder Structure
 
+The application follows a strictly typed, highly modular domain-driven architecture built specifically to handle complex synchronous operations, background AI threading, and 3D WebGL contexts without degrading UI performance.
+
 ```text
 FIFA-Pro/
+├── .github/workflows/         # CI/CD Pipelines (Auto-build, test, and deploy)
+├── public/                    # Static uncompiled assets (PWA manifests, root favicons)
 ├── src/
-│   ├── assets/                # Local images and icons
+│   ├── assets/                # Local images, SVG icons, and optimized graphical assets
+│   │
 │   ├── components/            # Reusable UI & Layouts
-│   │   ├── 3d/                # React Three Fiber / WebGL Scenes
-│   │   ├── layout/            # App shells, Navigation, and Tickers
-│   │   └── ui/                # UI components (Flags, Badges, StatBars)
-│   ├── data/                  # Fallback databases & mock seeds (48-Team dictionary)
-│   ├── pages/                 # Route-level components (Lazy-loaded)
-│   │   ├── Dashboard.tsx      # Entry point & live overview
-│   │   ├── Compare.tsx        # Head-to-head radar analytics & AI simulations
-│   │   ├── MatchDetail.tsx    # Live events and TensorFlow match prediction
-│   │   └── ...
-│   ├── services/              # External integrations
-│   │   ├── api.ts             # ESPN fetchers & data normalization
-│   │   └── mlPredictor.ts     # TensorFlow.js Neural Network pipeline
-│   ├── store/                 # Global state management
-│   │   └── tournamentStore.ts # Zustand implementation with dynamic algorithms
-│   ├── styles/                # CSS variables, dark mode tokens, animations
-│   ├── App.tsx                # App router configuration
+│   │   ├── 3d/                # React Three Fiber / WebGL Scenes (Immersive interactive elements)
+│   │   │   ├── WorldCupScene3D.tsx   # Core 3D stadium environment mapping
+│   │   │   └── PerformanceMonitor.tsx # Frame-rate and WebGL fallback handlers
+│   │   ├── layout/            # App shells, global Navigation, and Live Tickers
+│   │   └── ui/                # Pure/Dumb UI components (Flags, Badges, StatBars)
+│   │
+│   ├── data/                  # Fallback databases & mock seeds for API resiliency
+│   │   ├── teams.ts           # 48-Team dictionary (rosters, colors, configs)
+│   │   └── ...                # Mock datasets for offline-mode availability
+│   │
+│   ├── hooks/                 # Custom React hooks
+│   │   └── index.ts           # Reusable viewport checks, interval hooks, and observers
+│   │
+│   ├── pages/                 # Route-level Page Modules (Aggressively Lazy-loaded via Suspense)
+│   │   ├── Dashboard.tsx      # Entry point & dynamic live overview (KPIs, Active Matches)
+│   │   ├── Compare.tsx        # Head-to-head analytics & AI simulation arena
+│   │   ├── MatchDetail.tsx    # Live events timeline and TensorFlow match prediction UI
+│   │   ├── Standings.tsx      # Dynamically generated Group Tables & Bracket progression
+│   │   └── ...                # Other distinct app modules (Map, Teams, Players, Stats)
+│   │
+│   ├── services/              # External Integrations & Data Pipelines
+│   │   ├── api.ts             # ESPN fetchers, HTTP abstractions, and payload normalization
+│   │   └── mlPredictor.ts     # TensorFlow.js Neural Network training loop and inference logic
+│   │
+│   ├── store/                 # Global state management ecosystem
+│   │   └── tournamentStore.ts # Zustand store serving as a mathematical live-calculator
+│   │
+│   ├── styles/                # CSS Architecture
+│   │   └── globals.css        # Root variables, dark mode tokens, and complex micro-animations
+│   │
+│   ├── types/                 # Global TypeScript definitions & interfaces
+│   │   └── index.ts           # Strict typings for Matches, Teams, Stats, and ML Models
+│   │
+│   ├── utils/                 # Pure helper functions
+│   │   └── index.ts           # Math, date parsing, color conversions, etc.
+│   │
+│   ├── App.tsx                # React Router DOM configuration and Context Providers
 │   └── main.tsx               # React application entry point
+│
+├── .eslintrc.cjs              # Strict linting rules and code-quality enforcement
+├── .prettierrc                # Project-wide formatting standards
+├── tsconfig.json              # Advanced TypeScript compiler options
+└── vite.config.ts             # Bundler configuration (Rollup optimizations, plugins)
 ```
 
 ---
