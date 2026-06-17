@@ -38,6 +38,7 @@ This application bypasses generic UI libraries in favor of a **custom glassmorph
 ## ✨ Key Features
 
 - **🔴 100% Live Native Synchronization:** All tournament standings, knockouts, top scorers, top playmakers, and match points are computed mathematically in real-time by ingesting live ESPN backend data every 30 seconds.
+- **🎥 Cinematic Intro Sequence:** Welcomes users with a highly polished 60FPS `framer-motion` animated transition sequence featuring glowing scanlines and dynamic typography before fading into the hub.
 - **🤖 In-Browser AI Prediction Engine:** Leverages `TensorFlow.js` to train a dense neural network dynamically on the user's browser based on live team form, historical data, and current tournament statistics. Predicts match outcomes and runs automated AI-vs-AI simulations.
 - **🌍 Immersive 3D Environments:** Utilizes `React Three Fiber` and `@react-three/drei` to render an interactive, floating 3D stadium scene directly in the background of the application.
 - **📈 Advanced Dynamic Analytics:** Features real-time `Recharts` graphs covering Confederation Performances via Radar Charts, Top Goalscorers, Assists Leaders, and Goals-by-Minute area curves.
