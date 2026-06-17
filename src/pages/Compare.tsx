@@ -1,9 +1,10 @@
-import React, { useState, useMemo } from 'react';
+import React, { useState, useMemo, useEffect } from 'react';
 import { motion } from 'framer-motion';
 import { Radar, RadarChart, PolarGrid, PolarAngleAxis, PolarRadiusAxis, ResponsiveContainer, Tooltip } from 'recharts';
 import { Swords, Info } from 'lucide-react';
 import { useTournamentStore } from '../store/tournamentStore';
 import CountryFlag from '../components/ui/CountryFlag';
+import { predictMatch } from '../services/mlPredictor';
 
 export default function Compare() {
   const { teams } = useTournamentStore();
@@ -14,6 +15,14 @@ export default function Compare() {
 
   const teamA = teams.find(t => t.countryCode === teamAId);
   const teamB = teams.find(t => t.countryCode === teamBId);
+
+  const [prediction, setPrediction] = useState<{homeWin: number, draw: number, awayWin: number} | null>(null);
+
+  useEffect(() => {
+    if (teamA && teamB) {
+      predictMatch(teamA, teamB).then(setPrediction);
+    }
+  }, [teamA, teamB]);
 
   // Generate normalized radar data based on team stats + fifa ranking
   const radarData = useMemo(() => {
@@ -183,6 +192,39 @@ export default function Compare() {
           </div>
         </div>
       </div>
+
+      {/* ─── AI PREDICTION ───────────────────────────────────────────────── */}
+      {prediction && (
+        <div className="card" style={{ padding: '40px', marginTop: 32, background: 'linear-gradient(135deg, rgba(139,92,246,0.1), rgba(59,130,246,0.1))', border: '1px solid rgba(139,92,246,0.3)' }}>
+          <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'center', gap: 12, marginBottom: 24 }}>
+            <Swords size={24} style={{ color: '#8B5CF6' }} />
+            <h2 style={{ fontFamily: 'Bebas Neue, sans-serif', fontSize: 32, letterSpacing: '0.04em', color: '#8B5CF6' }}>
+              AI Match Simulation
+            </h2>
+          </div>
+          
+          <div style={{ display: 'flex', justifyContent: 'space-between', marginBottom: 12 }}>
+            <span style={{ fontSize: 16, fontWeight: 700, color: 'var(--brand-red)', textTransform: 'uppercase' }}>{teamA?.name} Win</span>
+            <span style={{ fontSize: 16, fontWeight: 700, color: 'var(--text-muted)', textTransform: 'uppercase' }}>Draw</span>
+            <span style={{ fontSize: 16, fontWeight: 700, color: 'var(--info-blue)', textTransform: 'uppercase' }}>{teamB?.name} Win</span>
+          </div>
+          
+          <div style={{ display: 'flex', height: 24, borderRadius: 12, overflow: 'hidden', gap: 4, marginBottom: 12 }}>
+            <motion.div initial={{ width: 0 }} animate={{ width: `${prediction.homeWin * 100}%` }} style={{ background: 'var(--brand-red)', display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
+              <span style={{ fontFamily: 'JetBrains Mono, monospace', fontSize: 14, fontWeight: 700, color: 'white' }}>{(prediction.homeWin * 100).toFixed(1)}%</span>
+            </motion.div>
+            <motion.div initial={{ width: 0 }} animate={{ width: `${prediction.draw * 100}%` }} style={{ background: 'rgba(255,255,255,0.1)', display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
+              <span style={{ fontFamily: 'JetBrains Mono, monospace', fontSize: 14, fontWeight: 700, color: 'white' }}>{(prediction.draw * 100).toFixed(1)}%</span>
+            </motion.div>
+            <motion.div initial={{ width: 0 }} animate={{ width: `${prediction.awayWin * 100}%` }} style={{ background: 'var(--info-blue)', display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
+              <span style={{ fontFamily: 'JetBrains Mono, monospace', fontSize: 14, fontWeight: 700, color: 'white' }}>{(prediction.awayWin * 100).toFixed(1)}%</span>
+            </motion.div>
+          </div>
+          <p style={{ textAlign: 'center', color: 'var(--text-muted)', fontSize: 14, maxWidth: 600, margin: '0 auto' }}>
+            Our advanced Neural Network has simulated this matchup using historical performance, FIFA rankings, and tournament statistics to predict the most likely outcome.
+          </p>
+        </div>
+      )}
     </div>
   );
 }

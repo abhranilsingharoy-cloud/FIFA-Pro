@@ -1,5 +1,5 @@
 import { useTournamentStore } from '../store/tournamentStore';
-import React, { useMemo } from 'react';
+import React, { useMemo, useEffect, useState } from 'react';
 import { useParams, useNavigate } from 'react-router-dom';
 import { motion } from 'framer-motion';
 import {
@@ -8,6 +8,7 @@ import {
 } from 'lucide-react';
 
 import { STADIUMS } from '../data/stadiums';
+import { predictMatch } from '../services/mlPredictor';
 
 import type { MatchEvent } from '../types';
 
@@ -180,9 +181,22 @@ export default function MatchDetail() {
   const { matchId } = useParams<{ matchId: string }>();
   const navigate = useNavigate();
 
-  const match = useMemo(() => matches.find(m => m.id === matchId), [matchId]);
+  const match = useMemo(() => matches.find(m => m.id === matchId), [matchId, matches]);
   const stadium = match ? getStadium(match.stadiumId) : undefined;
   const motmPlayer = match?.manOfTheMatch ? getPlayer(players, match.manOfTheMatch) : undefined;
+
+  const isCompleted = match?.status === 'completed';
+  const [prediction, setPrediction] = useState<{homeWin: number, draw: number, awayWin: number} | null>(null);
+
+  useEffect(() => {
+    if (match && !isCompleted) {
+      const home = teams.find(t => t.countryCode === match.homeTeam.countryCode);
+      const away = teams.find(t => t.countryCode === match.awayTeam.countryCode);
+      if (home && away) {
+        predictMatch(home, away).then(setPrediction);
+      }
+    }
+  }, [match, isCompleted, teams]);
 
   if (!match) {
     return (
@@ -195,7 +209,6 @@ export default function MatchDetail() {
   }
 
   const isLive = match.status === 'live' || match.status === 'ht';
-  const isCompleted = match.status === 'completed';
   const hasScore = !!match.score;
 
   const sortedEvents = [...match.events].sort((a, b) => a.minute - b.minute || (a.stoppageTime || 0) - (b.stoppageTime || 0));
@@ -415,6 +428,47 @@ export default function MatchDetail() {
 
           {/* ── RIGHT: Stats + MOTM ── */}
           <div>
+            {/* AI Prediction */}
+            {!isCompleted && prediction && (
+              <motion.div
+                initial={{ opacity: 0, y: 24 }}
+                animate={{ opacity: 1, y: 0 }}
+                transition={{ delay: 0.1 }}
+                style={{
+                  background: 'linear-gradient(135deg, rgba(59,130,246,0.05) 0%, rgba(139,92,246,0.1) 100%)',
+                  border: '1px solid rgba(139,92,246,0.3)',
+                  borderRadius: '12px',
+                  padding: '20px',
+                  marginBottom: '24px',
+                }}
+              >
+                <div style={{ display: 'flex', alignItems: 'center', gap: '8px', marginBottom: '16px' }}>
+                  <Star size={20} style={{ color: '#8B5CF6' }} />
+                  <h2 style={{ fontFamily: "'Bebas Neue', sans-serif", fontSize: '22px', letterSpacing: '0.04em', color: '#8B5CF6' }}>
+                    AI Match Predictor
+                  </h2>
+                </div>
+                
+                <div style={{ display: 'flex', justifyContent: 'space-between', marginBottom: '8px' }}>
+                  <span style={{ fontSize: '12px', fontWeight: 700, color: 'var(--brand-red)', textTransform: 'uppercase' }}>{match.homeTeam.name} Win</span>
+                  <span style={{ fontSize: '12px', fontWeight: 700, color: 'var(--text-muted)', textTransform: 'uppercase' }}>Draw</span>
+                  <span style={{ fontSize: '12px', fontWeight: 700, color: 'var(--info-blue)', textTransform: 'uppercase' }}>{match.awayTeam.name} Win</span>
+                </div>
+                
+                <div style={{ display: 'flex', height: '12px', borderRadius: '6px', overflow: 'hidden', gap: '2px', marginBottom: '8px' }}>
+                  <motion.div initial={{ width: 0 }} animate={{ width: `${prediction.homeWin * 100}%` }} style={{ background: 'var(--brand-red)' }} />
+                  <motion.div initial={{ width: 0 }} animate={{ width: `${prediction.draw * 100}%` }} style={{ background: 'var(--border-subtle)' }} />
+                  <motion.div initial={{ width: 0 }} animate={{ width: `${prediction.awayWin * 100}%` }} style={{ background: 'var(--info-blue)' }} />
+                </div>
+
+                <div style={{ display: 'flex', justifyContent: 'space-between' }}>
+                  <span style={{ fontFamily: "'JetBrains Mono', monospace", fontSize: '14px', fontWeight: 700, color: 'var(--brand-red)' }}>{(prediction.homeWin * 100).toFixed(1)}%</span>
+                  <span style={{ fontFamily: "'JetBrains Mono', monospace", fontSize: '14px', fontWeight: 700, color: 'var(--text-muted)' }}>{(prediction.draw * 100).toFixed(1)}%</span>
+                  <span style={{ fontFamily: "'JetBrains Mono', monospace", fontSize: '14px', fontWeight: 700, color: 'var(--info-blue)' }}>{(prediction.awayWin * 100).toFixed(1)}%</span>
+                </div>
+              </motion.div>
+            )}
+
             {/* Live Stats */}
             {stats && (
               <motion.div

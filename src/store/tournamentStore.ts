@@ -1,6 +1,7 @@
 import { create } from 'zustand';
 import type { Match, Player, Team } from '../types';
 import { fetchMatches, fetchTeams, fetchPlayers, fetchTopScorers } from '../services/api';
+import { trainTournamentModel } from '../services/mlPredictor';
 
 interface TournamentState {
   matches: Match[];
@@ -73,6 +74,8 @@ export const useTournamentStore = create<TournamentState>((set, get) => ({
         liveMatches: matches.filter(m => m.status === 'live'),
         isLoading: false
       });
+      // Fire and forget ML training in background
+      trainTournamentModel(teams, matches).catch(e => console.error("ML Training Error:", e));
     } catch (err: any) {
       if (!backgroundRefresh) set({ error: err.message || 'Failed to fetch data', isLoading: false });
     }
