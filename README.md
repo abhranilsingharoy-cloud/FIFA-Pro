@@ -1,5 +1,4 @@
-<div align="center">
-  alt="FIFA World Cup 2026 Logo" width="150" />
+alt="FIFA World Cup 2026 Logo" width="150" />
   <h1>FIFA World Cup 2026 Hub</h1>
   
   <p>
