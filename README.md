@@ -1,5 +1,4 @@
-alt="FIFA World Cup 2026 Logo" width="150" />
-  <h1>FIFA World Cup 2026 Hub</h1>
+<h1>FIFA World Cup 2026 Hub</h1>
   
   <p>
     <strong>A next-generation, high-performance analytics dashboard, live tracker, and AI predictor for the 2026 FIFA World Cup.</strong>
