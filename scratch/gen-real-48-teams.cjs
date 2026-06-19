@@ -83,7 +83,7 @@ for (const [groupId, teams] of Object.entries(groupsData)) {
     finalTeams.push({
       name: t.name,
       countryCode: t.code.toUpperCase(),
-      flag: \`https://flagcdn.com/w320/\${t.code}.png\`,
+      flag: `https://flagcdn.com/w320/${t.code}.png`,
       confederation: t.conf,
       groupId: groupId,
       fifaRanking: Math.floor(Math.random() * 50) + 1,
@@ -105,10 +105,10 @@ for (const [groupId, teams] of Object.entries(groupsData)) {
   }
 }
 
-const fileContent = \`import type { Team } from '../types';
+const fileContent = `import type { Team } from '../types';
 
-export const TEAMS: Team[] = \${JSON.stringify(finalTeams, null, 2)};
-\`;
+export const TEAMS: Team[] = ${JSON.stringify(finalTeams, null, 2)};
+`;
 
 fs.writeFileSync(path.join(__dirname, '../src/data/teams.ts'), fileContent);
 console.log('Real 48 teams generated!');
