@@ -45,6 +45,36 @@ This application bypasses generic UI libraries in favor of a **custom glassmorph
 
 ---
 
+## 🎨 Visual Architecture
+
+FIFA-Pro is structured as a client-side Single Page Application (SPA). React Router acts as the central coordinator:
+
+```mermaid
+flowchart TD
+    A[Browser Navigation Event] --> B[React Router - App.tsx]
+    B --> C{Determine Route}
+    
+    C -->|/| D1["/ (Dashboard)"]
+    C -->|/schedule| D2["/schedule (Schedule)"]
+    C -->|/teams| D3["/teams (Teams)"]
+    C -->|/matches| D4["/matches (Matches)"]
+    C -->|/standings| D5["/standings (Standings)"]
+    C -->|/compare| D6["/compare (Compare)"]
+    
+    D1 --> E[Updates Virtual DOM]
+    D2 --> E
+    D3 --> E
+    D4 --> E
+    D5 --> E
+    D6 --> E
+    
+    E --> F[AppShell & Layout Container]
+    F --> G[Zustand Store - tournamentStore.ts]
+    G --> H[(ESPN Live API / Mock Data)]
+```
+
+---
+
 ## 🏗 Architecture & Folder Structure
 
 The application follows a strictly typed, highly modular domain-driven architecture built specifically to handle complex synchronous operations, background AI threading, and 3D WebGL contexts without degrading UI performance.
