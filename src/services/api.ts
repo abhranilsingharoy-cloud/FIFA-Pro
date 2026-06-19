@@ -19,10 +19,12 @@ function parseStage(slug: string): Match['stage'] {
 }
 
 export const fetchMatches = async (): Promise<Match[]> => {
+  let liveMatches: Match[] = [];
   try {
-    const response = await axios.get(`${ESPN_API_BASE}/scoreboard?dates=2026&limit=200`);
+    // Fetch live/recent international matches (no date restriction)
+    const response = await axios.get(`${ESPN_API_BASE}/scoreboard?limit=100`);
     if (response.data?.events?.length > 0) {
-      return response.data.events.map((ev: any, index: number) => {
+      liveMatches = response.data.events.map((ev: any, index: number) => {
         const homeComp = ev.competitions[0].competitors.find((c: any) => c.homeAway === 'home');
         const awayComp = ev.competitions[0].competitors.find((c: any) => c.homeAway === 'away');
         
@@ -31,7 +33,6 @@ export const fetchMatches = async (): Promise<Match[]> => {
         if (state === 'in') status = 'live';
         if (state === 'post') status = 'completed';
 
-        // Parse events (goals, cards) from details array if available
         const events: MatchEvent[] = [];
         if (ev.competitions[0].details) {
           ev.competitions[0].details.forEach((d: any) => {
@@ -43,7 +44,6 @@ export const fetchMatches = async (): Promise<Match[]> => {
             if (d.type.text.includes('Penalty')) type = 'penalty';
 
             const playerInvolved = d.athletesInvolved?.[0]?.shortName || 'Unknown Player';
-
             events.push({
               id: `ev_${d.clock.value}`,
               type,
@@ -63,11 +63,17 @@ export const fetchMatches = async (): Promise<Match[]> => {
         const aAbbr = awayComp?.team?.abbreviation || 'TBA';
         const awayTeamObj = TEAMS.find(t => t.name.toLowerCase() === aName.toLowerCase() || t.countryCode.toLowerCase() === aAbbr.toLowerCase());
 
+        // For dynamic standings updates, link the match to the tournament group
+        // Prefer home team's group, otherwise away team's group
+        let assignedGroup = undefined;
+        if (homeTeamObj) assignedGroup = homeTeamObj.groupId;
+        else if (awayTeamObj) assignedGroup = awayTeamObj.groupId;
+
         return {
           id: String(ev.id),
-          stage: parseStage(ev.season?.slug),
-          groupId: ev.season?.slug?.includes('group') ? 'A' : undefined, // Simplify group ID
-          matchNumber: index + 1,
+          stage: 'group', // treat live friendlies as group stage to inject points
+          groupId: assignedGroup,
+          matchNumber: 1000 + index,
           homeTeam: {
             countryCode: homeTeamObj ? homeTeamObj.countryCode : hAbbr,
             name: homeTeamObj ? homeTeamObj.name : hName,
@@ -86,12 +92,14 @@ export const fetchMatches = async (): Promise<Match[]> => {
           liveMinute: state === 'in' ? Math.floor(ev.status.clock / 60) : undefined,
           events: events,
         };
-      });
+      }).filter((m: Match) => m.groupId !== undefined); // Only keep matches involving our 48 teams
     }
   } catch (error) {
     console.error('Error fetching matches from ESPN:', error);
   }
-  return MATCHES;
+  
+  // Return base matches + live injected matches
+  return [...MATCHES, ...liveMatches];
 };
 
 export const fetchTeams = async (): Promise<Team[]> => {
