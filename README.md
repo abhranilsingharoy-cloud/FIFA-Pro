@@ -174,6 +174,6 @@ We employ a custom **Dark Mode Glassmorphism** design language:
 ---
 
 <div align="center">
-  <p><strong>Designed and Developed by Abhranil Singha Roy</strong></p>
+  <p><strong>Designed and Developed by Abhranil Singha Roy.</strong></p>
 </div>
 
